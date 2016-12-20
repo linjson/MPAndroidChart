@@ -3,7 +3,7 @@ package com.github.mikephil.charting.animation;
 
 /**
  * Easing options.
- * 
+ *
  * @author Daniel Cohen Gindi
  */
 public class Easing {
@@ -44,69 +44,72 @@ public class Easing {
     }
 
     public static EasingFunction getEasingFunctionFromOption(EasingOption easing) {
+        if (easing == null) {
+            return EasingFunctions.Linear;
+        }
         switch (easing) {
             default:
             case Linear:
-                return Easing.EasingFunctions.Linear;
+                return EasingFunctions.Linear;
             case EaseInQuad:
-                return Easing.EasingFunctions.EaseInQuad;
+                return EasingFunctions.EaseInQuad;
             case EaseOutQuad:
-                return Easing.EasingFunctions.EaseOutQuad;
+                return EasingFunctions.EaseOutQuad;
             case EaseInOutQuad:
-                return Easing.EasingFunctions.EaseInOutQuad;
+                return EasingFunctions.EaseInOutQuad;
             case EaseInCubic:
-                return Easing.EasingFunctions.EaseInCubic;
+                return EasingFunctions.EaseInCubic;
             case EaseOutCubic:
-                return Easing.EasingFunctions.EaseOutCubic;
+                return EasingFunctions.EaseOutCubic;
             case EaseInOutCubic:
-                return Easing.EasingFunctions.EaseInOutCubic;
+                return EasingFunctions.EaseInOutCubic;
             case EaseInQuart:
-                return Easing.EasingFunctions.EaseInQuart;
+                return EasingFunctions.EaseInQuart;
             case EaseOutQuart:
-                return Easing.EasingFunctions.EaseOutQuart;
+                return EasingFunctions.EaseOutQuart;
             case EaseInOutQuart:
-                return Easing.EasingFunctions.EaseInOutQuart;
+                return EasingFunctions.EaseInOutQuart;
             case EaseInSine:
-                return Easing.EasingFunctions.EaseInSine;
+                return EasingFunctions.EaseInSine;
             case EaseOutSine:
-                return Easing.EasingFunctions.EaseOutSine;
+                return EasingFunctions.EaseOutSine;
             case EaseInOutSine:
-                return Easing.EasingFunctions.EaseInOutSine;
+                return EasingFunctions.EaseInOutSine;
             case EaseInExpo:
-                return Easing.EasingFunctions.EaseInExpo;
+                return EasingFunctions.EaseInExpo;
             case EaseOutExpo:
-                return Easing.EasingFunctions.EaseOutExpo;
+                return EasingFunctions.EaseOutExpo;
             case EaseInOutExpo:
-                return Easing.EasingFunctions.EaseInOutExpo;
+                return EasingFunctions.EaseInOutExpo;
             case EaseInCirc:
-                return Easing.EasingFunctions.EaseInCirc;
+                return EasingFunctions.EaseInCirc;
             case EaseOutCirc:
-                return Easing.EasingFunctions.EaseOutCirc;
+                return EasingFunctions.EaseOutCirc;
             case EaseInOutCirc:
-                return Easing.EasingFunctions.EaseInOutCirc;
+                return EasingFunctions.EaseInOutCirc;
             case EaseInElastic:
-                return Easing.EasingFunctions.EaseInElastic;
+                return EasingFunctions.EaseInElastic;
             case EaseOutElastic:
-                return Easing.EasingFunctions.EaseOutElastic;
+                return EasingFunctions.EaseOutElastic;
             case EaseInOutElastic:
-                return Easing.EasingFunctions.EaseInOutElastic;
+                return EasingFunctions.EaseInOutElastic;
             case EaseInBack:
-                return Easing.EasingFunctions.EaseInBack;
+                return EasingFunctions.EaseInBack;
             case EaseOutBack:
-                return Easing.EasingFunctions.EaseOutBack;
+                return EasingFunctions.EaseOutBack;
             case EaseInOutBack:
-                return Easing.EasingFunctions.EaseInOutBack;
+                return EasingFunctions.EaseInOutBack;
             case EaseInBounce:
-                return Easing.EasingFunctions.EaseInBounce;
+                return EasingFunctions.EaseInBounce;
             case EaseOutBounce:
-                return Easing.EasingFunctions.EaseOutBounce;
+                return EasingFunctions.EaseOutBounce;
             case EaseInOutBounce:
-                return Easing.EasingFunctions.EaseInOutBounce;
+                return EasingFunctions.EaseInOutBounce;
         }
     }
-    
+
     private static class EasingFunctions {
-        
+
         /**
          * ########## ########## ########## ########## ########## ##########
          * PREDEFINED EASING FUNCTIONS BELOW THIS
@@ -343,18 +346,15 @@ public class Easing {
 
                     @Override
                     public float getInterpolation(float input) {
-                        if (input == 0)
-                        {
+                        if (input == 0) {
                             return 0.f;
                         }
-                        if (input == 1f)
-                        {
+                        if (input == 1f) {
                             return 1.f;
                         }
 
                         float position = input / 0.5f;
-                        if (position < 1.f)
-                        {
+                        if (position < 1.f) {
                             return 0.5f * (float) Math.pow(2.f, 10.f * (position - 1.f));
                         }
                         return 0.5f * (-(float) Math.pow(2.f, -10.f * --position) + 2.f);
@@ -406,12 +406,11 @@ public class Easing {
                     @Override
                     public float getInterpolation(float input) {
                         float position = input / 0.5f;
-                        if (position < 1.f)
-                        {
+                        if (position < 1.f) {
                             return -0.5f * ((float) Math.sqrt(1.f - position * position) - 1.f);
                         }
                         return 0.5f * ((float) Math.sqrt(1.f - (position -= 2.f) * position)
-                        + 1.f);
+                                + 1.f);
                     }
                 };
 
@@ -441,22 +440,20 @@ public class Easing {
 
                     @Override
                     public float getInterpolation(float input) {
-                        if (input == 0)
-                        {
+                        if (input == 0) {
                             return 0.f;
                         }
 
                         float position = input;
-                        if (position == 1)
-                        {
+                        if (position == 1) {
                             return 1.f;
                         }
 
                         float p = .3f;
                         float s = p / (2.f * (float) Math.PI) * (float) Math.asin(1.f);
                         return -((float) Math.pow(2.f, 10.f * (position -= 1.f)) * (float)
-                        Math
-                                .sin((position - s) * (2.f * Math.PI) / p));
+                                Math
+                                        .sin((position - s) * (2.f * Math.PI) / p));
                     }
                 };
 
@@ -485,14 +482,12 @@ public class Easing {
 
                     @Override
                     public float getInterpolation(float input) {
-                        if (input == 0)
-                        {
+                        if (input == 0) {
                             return 0.f;
                         }
 
                         float position = input;
-                        if (position == 1)
-                        {
+                        if (position == 1) {
                             return 1.f;
                         }
 
@@ -538,24 +533,21 @@ public class Easing {
 
                     @Override
                     public float getInterpolation(float input) {
-                        if (input == 0)
-                        {
+                        if (input == 0) {
                             return 0.f;
                         }
 
                         float position = input / 0.5f;
-                        if (position == 2)
-                        {
+                        if (position == 2) {
                             return 1.f;
                         }
 
                         float p = (.3f * 1.5f);
                         float s = p / (2.f * (float) Math.PI) * (float) Math.asin(1.f);
-                        if (position < 1.f)
-                        {
+                        if (position < 1.f) {
                             return -.5f
                                     * ((float) Math.pow(2.f, 10.f * (position -= 1.f)) * (float) Math
-                                            .sin((position * 1f - s) * (2.f * Math.PI) / p));
+                                    .sin((position * 1f - s) * (2.f * Math.PI) / p));
                         }
                         return (float) Math.pow(2.f, -10.f * (position -= 1.f))
                                 * (float) Math.sin((position * 1f - s) * (2.f * Math.PI) / p) *
@@ -564,8 +556,7 @@ public class Easing {
                     }
                 };
 
-        public static final EasingFunction EaseInBack = new EasingFunction()
-        {
+        public static final EasingFunction EaseInBack = new EasingFunction() {
             // @Override
             // public float ease(long elapsed, long duration) {
             // final float s = 1.70158f;
@@ -581,8 +572,7 @@ public class Easing {
             }
         };
 
-        public static final EasingFunction EaseOutBack = new EasingFunction()
-        {
+        public static final EasingFunction EaseOutBack = new EasingFunction() {
             // @Override
             // public float ease(long elapsed, long duration) {
             // final float s = 1.70158f;
@@ -620,8 +610,7 @@ public class Easing {
                     public float getInterpolation(float input) {
                         float s = 1.70158f;
                         float position = input / 0.5f;
-                        if (position < 1.f)
-                        {
+                        if (position < 1.f) {
                             return 0.5f * (position * position * (((s *= (1.525f)) + 1.f) *
                                     position - s));
                         }
@@ -673,22 +662,15 @@ public class Easing {
                     @Override
                     public float getInterpolation(float input) {
                         float position = input;
-                        if (position < (1.f / 2.75f))
-                        {
+                        if (position < (1.f / 2.75f)) {
                             return (7.5625f * position * position);
-                        }
-                        else if (position < (2.f / 2.75f))
-                        {
+                        } else if (position < (2.f / 2.75f)) {
                             return (7.5625f * (position -= (1.5f / 2.75f)) * position + .75f);
-                        }
-                        else if (position < (2.5f / 2.75f))
-                        {
+                        } else if (position < (2.5f / 2.75f)) {
                             return (7.5625f * (position -= (2.25f / 2.75f)) * position + .9375f);
-                        }
-                        else
-                        {
+                        } else {
                             return (7.5625f * (position -= (2.625f / 2.75f)) * position +
-                            .984375f);
+                                    .984375f);
                         }
                     }
                 };
@@ -708,12 +690,11 @@ public class Easing {
 
                     @Override
                     public float getInterpolation(float input) {
-                        if (input < 0.5f)
-                        {
+                        if (input < 0.5f) {
                             return EaseInBounce.getInterpolation(input * 2) * .5f;
                         }
                         return EaseOutBounce.getInterpolation(input * 2 - 1f) * .5f +
-                        .5f;
+                                .5f;
                     }
                 };
 

@@ -1,14 +1,11 @@
 
 package com.github.mikephil.charting.data;
 
-import android.annotation.SuppressLint;
-
 /**
  * Subclass of Entry that holds all values for one entry in a CandleStickChart.
  * 
  * @author Philipp Jahoda
  */
-@SuppressLint("ParcelCreator")
 public class CandleEntry extends Entry {
 
     /** shadow-high value */
@@ -26,14 +23,14 @@ public class CandleEntry extends Entry {
     /**
      * Constructor.
      * 
-     * @param x The value on the x-axis.
+     * @param xIndex The index on the x-axis.
      * @param shadowH The (shadow) high value.
      * @param shadowL The (shadow) low value.
      * @param open The open value.
      * @param close The close value.
      */
-    public CandleEntry(float x, float shadowH, float shadowL, float open, float close) {
-        super(x, (shadowH + shadowL) / 2f);
+    public CandleEntry(int xIndex, float shadowH, float shadowL, float open, float close) {
+        super((shadowH + shadowL) / 2f, xIndex);
 
         this.mShadowHigh = shadowH;
         this.mShadowLow = shadowL;
@@ -44,16 +41,16 @@ public class CandleEntry extends Entry {
     /**
      * Constructor.
      * 
-     * @param x The value on the x-axis.
+     * @param xIndex The index on the x-axis.
      * @param shadowH The (shadow) high value.
      * @param shadowL The (shadow) low value.
      * @param open
      * @param close
      * @param data Spot for additional data this Entry represents.
      */
-    public CandleEntry(float x, float shadowH, float shadowL, float open, float close,
+    public CandleEntry(int xIndex, float shadowH, float shadowL, float open, float close,
             Object data) {
-        super(x, (shadowH + shadowL) / 2f, data);
+        super((shadowH + shadowL) / 2f, xIndex, data);
 
         this.mShadowHigh = shadowH;
         this.mShadowLow = shadowL;
@@ -85,13 +82,13 @@ public class CandleEntry extends Entry {
      * low)
      */
     @Override
-    public float getY() {
-        return super.getY();
+    public float getVal() {
+        return super.getVal();
     }
 
     public CandleEntry copy() {
 
-        CandleEntry c = new CandleEntry(getX(), mShadowHigh, mShadowLow, mOpen,
+        CandleEntry c = new CandleEntry(getXIndex(), mShadowHigh, mShadowLow, mOpen,
                 mClose, getData());
 
         return c;

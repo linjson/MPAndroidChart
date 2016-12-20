@@ -7,11 +7,10 @@ import com.github.mikephil.charting.utils.Utils;
 import java.util.ArrayList;
 import java.util.List;
 
-public class PieDataSet extends DataSet<PieEntry> implements IPieDataSet {
+public class PieDataSet extends DataSet<Entry> implements IPieDataSet {
 
     /** the space in pixels between the chart-slices, default 0f */
     private float mSliceSpace = 0f;
-    private boolean mAutomaticallyDisableSliceSpacing;
 
     /** indicates the selection distance of a pie slice */
     private float mShift = 18f;
@@ -25,18 +24,18 @@ public class PieDataSet extends DataSet<PieEntry> implements IPieDataSet {
     private float mValueLinePart2Length = 0.4f;
     private boolean mValueLineVariableLength = true;
 
-    public PieDataSet(List<PieEntry> yVals, String label) {
+    public PieDataSet(List<Entry> yVals, String label) {
         super(yVals, label);
 //        mShift = Utils.convertDpToPixel(12f);
     }
 
     @Override
-    public DataSet<PieEntry> copy() {
+    public DataSet<Entry> copy() {
 
-        List<PieEntry> yVals = new ArrayList<>();
+        List<Entry> yVals = new ArrayList<Entry>();
 
-        for (int i = 0; i < mValues.size(); i++) {
-            yVals.add(mValues.get(i).copy());
+        for (int i = 0; i < mYVals.size(); i++) {
+            yVals.add(mYVals.get(i).copy());
         }
 
         PieDataSet copied = new PieDataSet(yVals, getLabel());
@@ -44,15 +43,6 @@ public class PieDataSet extends DataSet<PieEntry> implements IPieDataSet {
         copied.mSliceSpace = mSliceSpace;
         copied.mShift = mShift;
         return copied;
-    }
-
-    @Override
-    protected void calcMinMax(PieEntry e) {
-
-        if (e == null)
-            return;
-
-        calcMinMaxY(e);
     }
 
     /**
@@ -77,30 +67,9 @@ public class PieDataSet extends DataSet<PieEntry> implements IPieDataSet {
     }
 
     /**
-     * When enabled, slice spacing will be 0.0 when the smallest value is going to be
-     *   smaller than the slice spacing itself.
-     *
-     * @param autoDisable
-     */
-    public void setAutomaticallyDisableSliceSpacing(boolean autoDisable) {
-        mAutomaticallyDisableSliceSpacing = autoDisable;
-    }
-
-    /**
-     * When enabled, slice spacing will be 0.0 when the smallest value is going to be
-     *   smaller than the slice spacing itself.
-     *
-     * @return
-     */
-    @Override
-    public boolean isAutomaticallyDisableSliceSpacingEnabled() {
-        return mAutomaticallyDisableSliceSpacing;
-    }
-
-    /**
      * sets the distance the highlighted piechart-slice of this DataSet is
      * "shifted" away from the center of the chart, default 12f
-     * 
+     *
      * @param shift
      */
     public void setSelectionShift(float shift) {

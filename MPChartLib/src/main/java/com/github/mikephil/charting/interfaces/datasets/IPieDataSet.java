@@ -2,12 +2,11 @@ package com.github.mikephil.charting.interfaces.datasets;
 
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.PieDataSet;
-import com.github.mikephil.charting.data.PieEntry;
 
 /**
  * Created by Philipp Jahoda on 03/11/15.
  */
-public interface IPieDataSet extends IDataSet<PieEntry> {
+public interface IPieDataSet extends IDataSet<Entry> {
 
     /**
      * Returns the space that is set to be between the piechart-slices of this
@@ -16,14 +15,6 @@ public interface IPieDataSet extends IDataSet<PieEntry> {
      * @return
      */
     float getSliceSpace();
-
-    /**
-     * When enabled, slice spacing will be 0.0 when the smallest value is going to be
-     *   smaller than the slice spacing itself.
-     *
-     * @return
-     */
-    boolean isAutomaticallyDisableSliceSpacingEnabled();
 
     /**
      * Returns the distance a highlighted piechart slice is "shifted" away from

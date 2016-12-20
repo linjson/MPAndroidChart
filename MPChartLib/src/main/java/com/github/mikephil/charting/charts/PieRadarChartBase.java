@@ -6,6 +6,7 @@ import android.animation.ValueAnimator;
 import android.animation.ValueAnimator.AnimatorUpdateListener;
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.graphics.PointF;
 import android.graphics.RectF;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -18,8 +19,11 @@ import com.github.mikephil.charting.data.ChartData;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.interfaces.datasets.IDataSet;
 import com.github.mikephil.charting.listener.PieRadarChartTouchListener;
-import com.github.mikephil.charting.utils.MPPointF;
+import com.github.mikephil.charting.utils.SelectionDetail;
 import com.github.mikephil.charting.utils.Utils;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Baseclass of PieChart and RadarChart.
@@ -29,24 +33,16 @@ import com.github.mikephil.charting.utils.Utils;
 public abstract class PieRadarChartBase<T extends ChartData<? extends IDataSet<? extends Entry>>>
         extends Chart<T> {
 
-    /**
-     * holds the normalized version of the current rotation angle of the chart
-     */
+    /** holds the normalized version of the current rotation angle of the chart */
     private float mRotationAngle = 270f;
 
-    /**
-     * holds the raw version of the current rotation angle of the chart
-     */
+    /** holds the raw version of the current rotation angle of the chart */
     private float mRawRotationAngle = 270f;
 
-    /**
-     * flag that indicates if rotation is enabled or not
-     */
+    /** flag that indicates if rotation is enabled or not */
     protected boolean mRotateEnabled = true;
 
-    /**
-     * Sets the minimum offset (padding) around the chart, defaults to 0.f
-     */
+    /** Sets the minimum offset (padding) around the chart, defaults to 0.f */
     protected float mMinOffset = 0.f;
 
     public PieRadarChartBase(Context context) {
@@ -70,12 +66,7 @@ public abstract class PieRadarChartBase<T extends ChartData<? extends IDataSet<?
 
     @Override
     protected void calcMinMax() {
-        //mXAxis.mAxisRange = mData.getXVals().size() - 1;
-    }
-
-    @Override
-    public int getMaxVisibleCount() {
-        return mData.getEntryCount();
+        mXAxis.mAxisRange = mData.getXVals().size() - 1;
     }
 
     @Override
@@ -115,10 +106,12 @@ public abstract class PieRadarChartBase<T extends ChartData<? extends IDataSet<?
         if (mLegend != null && mLegend.isEnabled() && !mLegend.isDrawInsideEnabled()) {
 
             float fullLegendWidth = Math.min(mLegend.mNeededWidth,
-                    mViewPortHandler.getChartWidth() * mLegend.getMaxSizePercent());
+                    mViewPortHandler.getChartWidth() * mLegend.getMaxSizePercent()) +
+                    mLegend.getFormSize() + mLegend.getFormToTextSpace();
 
             switch (mLegend.getOrientation()) {
-                case VERTICAL: {
+                case VERTICAL:
+                {
                     float xLegendOffset = 0.f;
 
                     if (mLegend.getHorizontalAlignment() == Legend.LegendHorizontalAlignment.LEFT
@@ -136,7 +129,7 @@ public abstract class PieRadarChartBase<T extends ChartData<? extends IDataSet<?
                             float legendWidth = fullLegendWidth + spacing;
                             float legendHeight = mLegend.mNeededHeight + mLegend.mTextHeightMax;
 
-                            MPPointF center = getCenter();
+                            PointF c = getCenter();
 
                             float bottomX = mLegend.getHorizontalAlignment() ==
                                     Legend.LegendHorizontalAlignment.RIGHT
@@ -145,22 +138,19 @@ public abstract class PieRadarChartBase<T extends ChartData<? extends IDataSet<?
                             float bottomY = legendHeight + 15.f;
                             float distLegend = distanceToCenter(bottomX, bottomY);
 
-                            MPPointF reference = getPosition(center, getRadius(),
+                            PointF reference = getPosition(c, getRadius(),
                                     getAngleForPoint(bottomX, bottomY));
 
                             float distReference = distanceToCenter(reference.x, reference.y);
                             float minOffset = Utils.convertDpToPixel(5f);
 
-                            if (bottomY >= center.y && getHeight() - legendWidth > getWidth()) {
+                            if (bottomY >= c.y && getHeight() - legendWidth > getWidth()) {
                                 xLegendOffset = legendWidth;
                             } else if (distLegend < distReference) {
 
                                 float diff = distReference - distLegend;
                                 xLegendOffset = minOffset + diff;
                             }
-
-                            MPPointF.recycleInstance(center);
-                            MPPointF.recycleInstance(reference);
                         }
                     }
 
@@ -187,7 +177,7 @@ public abstract class PieRadarChartBase<T extends ChartData<? extends IDataSet<?
                             break;
                     }
                 }
-                break;
+                    break;
 
                 case HORIZONTAL:
                     float yLegendOffset = 0.f;
@@ -259,7 +249,7 @@ public abstract class PieRadarChartBase<T extends ChartData<? extends IDataSet<?
      */
     public float getAngleForPoint(float x, float y) {
 
-        MPPointF c = getCenterOffsets();
+        PointF c = getCenterOffsets();
 
         double tx = x - c.x, ty = y - c.y;
         double length = Math.sqrt(tx * tx + ty * ty);
@@ -277,31 +267,23 @@ public abstract class PieRadarChartBase<T extends ChartData<? extends IDataSet<?
         if (angle > 360f)
             angle = angle - 360f;
 
-        MPPointF.recycleInstance(c);
-
         return angle;
     }
 
     /**
-     * Returns a recyclable MPPointF instance.
      * Calculates the position around a center point, depending on the distance
      * from the center, and the angle of the position around the center.
      *
      * @param center
      * @param dist
-     * @param angle  in degrees, converted to radians internally
+     * @param angle in degrees, converted to radians internally
      * @return
      */
-    public MPPointF getPosition(MPPointF center, float dist, float angle) {
+    protected PointF getPosition(PointF center, float dist, float angle) {
 
-        MPPointF p = MPPointF.getInstance(0, 0);
-        getPosition(center, dist, angle, p);
+        PointF p = new PointF((float) (center.x + dist * Math.cos(Math.toRadians(angle))),
+                (float) (center.y + dist * Math.sin(Math.toRadians(angle))));
         return p;
-    }
-
-    public void getPosition(MPPointF center, float dist, float angle, MPPointF outputPoint) {
-        outputPoint.x = (float) (center.x + dist * Math.cos(Math.toRadians(angle)));
-        outputPoint.y = (float) (center.y + dist * Math.sin(Math.toRadians(angle)));
     }
 
     /**
@@ -314,7 +296,7 @@ public abstract class PieRadarChartBase<T extends ChartData<? extends IDataSet<?
      */
     public float distanceToCenter(float x, float y) {
 
-        MPPointF c = getCenterOffsets();
+        PointF c = getCenterOffsets();
 
         float dist = 0f;
 
@@ -335,8 +317,6 @@ public abstract class PieRadarChartBase<T extends ChartData<? extends IDataSet<?
 
         // pythagoras
         dist = (float) Math.sqrt(Math.pow(xDist, 2.0) + Math.pow(yDist, 2.0));
-
-        MPPointF.recycleInstance(c);
 
         return dist;
     }
@@ -402,16 +382,12 @@ public abstract class PieRadarChartBase<T extends ChartData<? extends IDataSet<?
         return mRotateEnabled;
     }
 
-    /**
-     * Gets the minimum offset (padding) around the chart, defaults to 0.f
-     */
+    /** Gets the minimum offset (padding) around the chart, defaults to 0.f */
     public float getMinOffset() {
         return mMinOffset;
     }
 
-    /**
-     * Sets the minimum offset (padding) around the chart, defaults to 0.f
-     */
+    /** Sets the minimum offset (padding) around the chart, defaults to 0.f */
     public void setMinOffset(float minOffset) {
         mMinOffset = minOffset;
     }
@@ -462,6 +438,33 @@ public abstract class PieRadarChartBase<T extends ChartData<? extends IDataSet<?
     public float getYChartMin() {
         // TODO Auto-generated method stub
         return 0;
+    }
+
+    /**
+     * Returns an array of SelectionDetail objects for the given x-index. The SelectionDetail
+     * objects give information about the value at the selected index and the
+     * DataSet it belongs to. INFORMATION: This method does calculations at
+     * runtime. Do not over-use in performance critical situations.
+     *
+     * @return
+     */
+    public List<SelectionDetail> getSelectionDetailsAtIndex(int xIndex) {
+
+        List<SelectionDetail> vals = new ArrayList<SelectionDetail>();
+
+        for (int i = 0; i < mData.getDataSetCount(); i++) {
+
+            IDataSet<?> dataSet = mData.getDataSetByIndex(i);
+
+            // extract all y-values from all DataSets at the given x-index
+            final float yVal = dataSet.getYValForXIndex(xIndex);
+            if (yVal == Float.NaN)
+                continue;
+
+            vals.add(new SelectionDetail(yVal, i, dataSet));
+        }
+
+        return vals;
     }
 
     /**
