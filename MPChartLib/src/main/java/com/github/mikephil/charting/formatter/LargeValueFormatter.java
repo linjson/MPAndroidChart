@@ -1,7 +1,7 @@
 
 package com.github.mikephil.charting.formatter;
 
-import com.github.mikephil.charting.components.YAxis;
+import com.github.mikephil.charting.components.AxisBase;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.utils.ViewPortHandler;
 
@@ -17,17 +17,18 @@ import java.text.DecimalFormat;
  * @author Philipp Jahoda
  * @author Oleksandr Tyshkovets <olexandr.tyshkovets@gmail.com>
  */
-public class LargeValueFormatter implements ValueFormatter, YAxisValueFormatter {
+public class LargeValueFormatter implements IValueFormatter, IAxisValueFormatter
+{
 
     private static String[] SUFFIX = new String[]{
             "", "k", "m", "b", "t"
     };
-    private static final int MAX_LENGTH = 4;
+    private static final int MAX_LENGTH = 5;
     private DecimalFormat mFormat;
     private String mText = "";
 
     public LargeValueFormatter() {
-        mFormat = new DecimalFormat("###E0");
+        mFormat = new DecimalFormat("###E00");
     }
 
     /**
@@ -40,15 +41,15 @@ public class LargeValueFormatter implements ValueFormatter, YAxisValueFormatter 
         mText = appendix;
     }
 
-    // ValueFormatter
+    // IValueFormatter
     @Override
     public String getFormattedValue(float value, Entry entry, int dataSetIndex, ViewPortHandler viewPortHandler) {
         return makePretty(value) + mText;
     }
 
-    // YAxisValueFormatter
+    // IAxisValueFormatter
     @Override
-    public String getFormattedValue(float value, YAxis yAxis) {
+    public String getFormattedValue(float value, AxisBase axis) {
         return makePretty(value) + mText;
     }
 
@@ -68,9 +69,7 @@ public class LargeValueFormatter implements ValueFormatter, YAxisValueFormatter 
      * @param suff new suffix
      */
     public void setSuffix(String[] suff) {
-        if (suff.length == 5) {
-            SUFFIX = suff;
-        }
+        SUFFIX = suff;
     }
 
     /**
@@ -81,12 +80,20 @@ public class LargeValueFormatter implements ValueFormatter, YAxisValueFormatter 
 
         String r = mFormat.format(number);
 
-        r = r.replaceAll("E[0-9]", SUFFIX[Character.getNumericValue(r.charAt(r.length() - 1)) / 3]);
+        int numericValue1 = Character.getNumericValue(r.charAt(r.length() - 1));
+        int numericValue2 = Character.getNumericValue(r.charAt(r.length() - 2));
+        int combined = Integer.valueOf(numericValue2 + "" + numericValue1);
+
+        r = r.replaceAll("E[0-9][0-9]", SUFFIX[combined / 3]);
 
         while (r.length() > MAX_LENGTH || r.matches("[0-9]+\\.[a-z]")) {
             r = r.substring(0, r.length() - 2) + r.substring(r.length() - 1);
         }
 
         return r;
+    }
+
+    public int getDecimalDigits() {
+        return 0;
     }
 }

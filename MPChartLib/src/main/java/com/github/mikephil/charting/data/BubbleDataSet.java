@@ -1,8 +1,6 @@
 
 package com.github.mikephil.charting.data;
 
-import android.graphics.Color;
-
 import com.github.mikephil.charting.interfaces.datasets.IBubbleDataSet;
 import com.github.mikephil.charting.utils.Utils;
 
@@ -11,10 +9,6 @@ import java.util.List;
 
 public class BubbleDataSet extends BarLineScatterCandleBubbleDataSet<BubbleEntry> implements IBubbleDataSet {
 
-    // NOTE: Do not initialize these, as the calculate is called by the super,
-    // and the initializers are called after that and can reset the values
-    protected float mXMax;
-    protected float mXMin;
     protected float mMaxSize;
     protected boolean mNormalizeSize = true;
 
@@ -35,57 +29,13 @@ public class BubbleDataSet extends BarLineScatterCandleBubbleDataSet<BubbleEntry
     }
 
     @Override
-    public void calcMinMax(int start, int end) {
+    protected void calcMinMax(BubbleEntry e) {
+        super.calcMinMax(e);
 
-        if (mYVals == null)
-            return;
+        final float size = e.getSize();
 
-        if (mYVals.size() == 0)
-            return;
-
-        int endValue;
-
-        if (end == 0 || end >= mYVals.size())
-            endValue = mYVals.size() - 1;
-        else
-            endValue = end;
-
-        mYMin = yMin(mYVals.get(start));
-        mYMax = yMax(mYVals.get(start));
-
-        // need chart width to guess this properly
-
-        for (int i = start; i <= endValue; i++) {
-
-            final BubbleEntry entry = mYVals.get(i);
-
-            float ymin = yMin(entry);
-            float ymax = yMax(entry);
-
-            if (ymin < mYMin) {
-                mYMin = ymin;
-            }
-
-            if (ymax > mYMax) {
-                mYMax = ymax;
-            }
-
-            final float xmin = xMin(entry);
-            final float xmax = xMax(entry);
-
-            if (xmin < mXMin) {
-                mXMin = xmin;
-            }
-
-            if (xmax > mXMax) {
-                mXMax = xmax;
-            }
-
-            final float size = largestSize(entry);
-
-            if (size > mMaxSize) {
-                mMaxSize = size;
-            }
+        if (size > mMaxSize) {
+            mMaxSize = size;
         }
     }
 
@@ -94,8 +44,8 @@ public class BubbleDataSet extends BarLineScatterCandleBubbleDataSet<BubbleEntry
 
         List<BubbleEntry> yVals = new ArrayList<BubbleEntry>();
 
-        for (int i = 0; i < mYVals.size(); i++) {
-            yVals.add(mYVals.get(i).copy());
+        for (int i = 0; i < mValues.size(); i++) {
+            yVals.add(mValues.get(i).copy());
         }
 
         BubbleDataSet copied = new BubbleDataSet(yVals, getLabel());
@@ -103,16 +53,6 @@ public class BubbleDataSet extends BarLineScatterCandleBubbleDataSet<BubbleEntry
         copied.mHighLightColor = mHighLightColor;
 
         return copied;
-    }
-
-    @Override
-    public float getXMax() {
-        return mXMax;
-    }
-
-    @Override
-    public float getXMin() {
-        return mXMin;
     }
 
     @Override
@@ -127,25 +67,5 @@ public class BubbleDataSet extends BarLineScatterCandleBubbleDataSet<BubbleEntry
 
     public void setNormalizeSizeEnabled(boolean normalizeSize) {
         mNormalizeSize = normalizeSize;
-    }
-
-    private float yMin(BubbleEntry entry) {
-        return entry.getVal();
-    }
-
-    private float yMax(BubbleEntry entry) {
-        return entry.getVal();
-    }
-
-    private float xMin(BubbleEntry entry) {
-        return (float) entry.getXIndex();
-    }
-
-    private float xMax(BubbleEntry entry) {
-        return (float) entry.getXIndex();
-    }
-
-    private float largestSize(BubbleEntry entry) {
-        return entry.getSize();
     }
 }

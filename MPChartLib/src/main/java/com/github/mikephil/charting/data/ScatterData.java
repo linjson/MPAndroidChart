@@ -3,7 +3,6 @@ package com.github.mikephil.charting.data;
 
 import com.github.mikephil.charting.interfaces.datasets.IScatterDataSet;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class ScatterData extends BarLineScatterCandleBubbleData<IScatterDataSet> {
@@ -11,40 +10,18 @@ public class ScatterData extends BarLineScatterCandleBubbleData<IScatterDataSet>
     public ScatterData() {
         super();
     }
-    
-    public ScatterData(List<String> xVals) {
-        super(xVals);
+
+    public ScatterData(List<IScatterDataSet> dataSets) {
+        super(dataSets);
     }
 
-    public ScatterData(String[] xVals) {
-        super(xVals);
-    }
-
-    public ScatterData(List<String> xVals, List<IScatterDataSet> dataSets) {
-        super(xVals, dataSets);
-    }
-
-    public ScatterData(String[] xVals, List<IScatterDataSet> dataSets) {
-        super(xVals, dataSets);
-    }
-
-    public ScatterData(List<String> xVals, IScatterDataSet dataSet) {
-        super(xVals, toList(dataSet));
-    }
-
-    public ScatterData(String[] xVals, IScatterDataSet dataSet) {
-        super(xVals, toList(dataSet));
-    }
-
-    private static List<IScatterDataSet> toList(IScatterDataSet dataSet) {
-        List<IScatterDataSet> sets = new ArrayList<IScatterDataSet>();
-        sets.add(dataSet);
-        return sets;
+    public ScatterData(IScatterDataSet... dataSets) {
+        super(dataSets);
     }
 
     /**
      * Returns the maximum shape-size across all DataSets.
-     * 
+     *
      * @return
      */
     public float getGreatestShapeSize() {

@@ -56,7 +56,6 @@ public interface ICandleDataSet extends ILineScatterCandleRadarDataSet<CandleEnt
      *
      * @return
      */
-    @ColorInt
     int getIncreasingColor();
 
     /**
@@ -64,7 +63,6 @@ public interface ICandleDataSet extends ILineScatterCandleRadarDataSet<CandleEnt
      *
      * @return
      */
-    @ColorInt
     int getDecreasingColor();
 
     /**

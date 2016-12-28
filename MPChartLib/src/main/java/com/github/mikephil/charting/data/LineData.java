@@ -3,7 +3,6 @@ package com.github.mikephil.charting.data;
 
 import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -17,33 +16,11 @@ public class LineData extends BarLineScatterCandleBubbleData<ILineDataSet> {
         super();
     }
 
-    public LineData(List<String> xVals) {
-        super(xVals);
+    public LineData(ILineDataSet... dataSets) {
+        super(dataSets);
     }
 
-    public LineData(String[] xVals) {
-        super(xVals);
-    }
-
-    public LineData(List<String> xVals, List<ILineDataSet> dataSets) {
-        super(xVals, dataSets);
-    }
-
-    public LineData(String[] xVals, List<ILineDataSet> dataSets) {
-        super(xVals, dataSets);
-    }
-
-    public LineData(List<String> xVals, ILineDataSet dataSet) {
-        super(xVals, toList(dataSet));
-    }
-
-    public LineData(String[] xVals, ILineDataSet dataSet) {
-        super(xVals, toList(dataSet));
-    }
-
-    private static List<ILineDataSet> toList(ILineDataSet dataSet) {
-        List<ILineDataSet> sets = new ArrayList<ILineDataSet>();
-        sets.add(dataSet);
-        return sets;
+    public LineData(List<ILineDataSet> dataSets) {
+        super(dataSets);
     }
 }
