@@ -44,3 +44,5 @@ build/
 target/
 
 .DS_Store
+gupiaoapp
+MPChartLib/src/main/java/com/github/mikephil/charting/sharechart
