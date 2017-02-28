@@ -201,10 +201,16 @@ public abstract class BarLineChartBase<T extends BarLineScatterCandleBubbleData<
         // execute all drawing commands
         drawGridBackground(canvas);
 
+        if (mAutoScaleMinMaxEnabled) {
+            autoScale();
+        }
+
         if (mAxisLeft.isEnabled())
             mAxisRendererLeft.computeAxis(mAxisLeft.mAxisMinimum, mAxisLeft.mAxisMaximum, mAxisLeft.isInverted());
+
         if (mAxisRight.isEnabled())
             mAxisRendererRight.computeAxis(mAxisRight.mAxisMinimum, mAxisRight.mAxisMaximum, mAxisRight.isInverted());
+
         if (mXAxis.isEnabled())
             mXAxisRenderer.computeAxis(mXAxis.mAxisMinimum, mXAxis.mAxisMaximum, false);
 
@@ -212,21 +218,17 @@ public abstract class BarLineChartBase<T extends BarLineScatterCandleBubbleData<
         mAxisRendererLeft.renderAxisLine(canvas);
         mAxisRendererRight.renderAxisLine(canvas);
 
-        if (mAutoScaleMinMaxEnabled) {
-            autoScale();
-        }
-
         mXAxisRenderer.renderGridLines(canvas);
         mAxisRendererLeft.renderGridLines(canvas);
         mAxisRendererRight.renderGridLines(canvas);
 
-        if (mXAxis.isDrawLimitLinesBehindDataEnabled())
+        if (mXAxis.isEnabled() && mXAxis.isDrawLimitLinesBehindDataEnabled())
             mXAxisRenderer.renderLimitLines(canvas);
 
-        if (mAxisLeft.isDrawLimitLinesBehindDataEnabled())
+        if (mAxisLeft.isEnabled() && mAxisLeft.isDrawLimitLinesBehindDataEnabled())
             mAxisRendererLeft.renderLimitLines(canvas);
 
-        if (mAxisRight.isDrawLimitLinesBehindDataEnabled())
+        if (mAxisRight.isEnabled() && mAxisRight.isDrawLimitLinesBehindDataEnabled())
             mAxisRendererRight.renderLimitLines(canvas);
 
         // make sure the data cannot be drawn outside the content-rect
@@ -261,13 +263,13 @@ public abstract class BarLineChartBase<T extends BarLineScatterCandleBubbleData<
 
         mRenderer.drawExtras(canvas);
 
-        if (!mXAxis.isDrawLimitLinesBehindDataEnabled())
+        if (mXAxis.isEnabled() && !mXAxis.isDrawLimitLinesBehindDataEnabled())
             mXAxisRenderer.renderLimitLines(canvas);
 
-        if (!mAxisLeft.isDrawLimitLinesBehindDataEnabled())
+        if (mAxisLeft.isEnabled() && !mAxisLeft.isDrawLimitLinesBehindDataEnabled())
             mAxisRendererLeft.renderLimitLines(canvas);
 
-        if (!mAxisRight.isDrawLimitLinesBehindDataEnabled())
+        if (mAxisRight.isEnabled() && !mAxisRight.isDrawLimitLinesBehindDataEnabled())
             mAxisRendererRight.renderLimitLines(canvas);
 
         mXAxisRenderer.renderAxisLabels(canvas);
@@ -372,9 +374,14 @@ public abstract class BarLineChartBase<T extends BarLineScatterCandleBubbleData<
         mXAxis.calculate(mData.getXMin(), mData.getXMax());
 
         // calculate axis range (min / max) according to provided data
-        mAxisLeft.calculate(mData.getYMin(AxisDependency.LEFT), mData.getYMax(AxisDependency.LEFT));
-        mAxisRight.calculate(mData.getYMin(AxisDependency.RIGHT), mData.getYMax(AxisDependency
-                .RIGHT));
+
+        if (mAxisLeft.isEnabled())
+            mAxisLeft.calculate(mData.getYMin(AxisDependency.LEFT),
+                    mData.getYMax(AxisDependency.LEFT));
+
+        if (mAxisRight.isEnabled())
+            mAxisRight.calculate(mData.getYMin(AxisDependency.RIGHT),
+                    mData.getYMax(AxisDependency.RIGHT));
 
         calculateOffsets();
     }
