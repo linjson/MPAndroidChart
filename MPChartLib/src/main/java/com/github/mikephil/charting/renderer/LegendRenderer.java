@@ -238,7 +238,7 @@ public class LegendRenderer extends Renderer {
         float labelLineHeight = Utils.getLineHeight(mLegendLabelPaint, legendFontMetrics);
         float labelLineSpacing = Utils.getLineSpacing(mLegendLabelPaint, legendFontMetrics)
                 + Utils.convertDpToPixel(mLegend.getYEntrySpace());
-        float formYOffset = labelLineHeight - Utils.calcTextHeight(mLegendLabelPaint, "ABC") / 2.f;
+        float formYOffset = labelLineHeight - (mLegend.getYEntrySpace()==0?Utils.calcTextHeight(mLegendLabelPaint, "ABC") / 2.f:Utils.convertDpToPixel(mLegend.getYEntrySpace()));
 
         LegendEntry[] entries = mLegend.getEntries();
 

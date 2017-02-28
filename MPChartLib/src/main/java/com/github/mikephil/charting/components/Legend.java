@@ -4,7 +4,6 @@ package com.github.mikephil.charting.components;
 import android.graphics.DashPathEffect;
 import android.graphics.Paint;
 
-import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.utils.ColorTemplate;
 import com.github.mikephil.charting.utils.FSize;
 import com.github.mikephil.charting.utils.Utils;
@@ -859,7 +858,7 @@ public class Legend extends ComponentBase {
         float stackSpace = Utils.convertDpToPixel(mStackSpace);
         float formToTextSpace = Utils.convertDpToPixel(mFormToTextSpace);
         float xEntrySpace = Utils.convertDpToPixel(mXEntrySpace);
-        float yEntrySpace = Utils.convertDpToPixel(mYEntrySpace);
+        float yEntrySpace = mYEntrySpace == 0 ? Utils.calcTextHeight(labelpaint, "ABC") / 2.f : Utils.convertDpToPixel(mYEntrySpace);
         boolean wordWrapEnabled = mWordWrapEnabled;
         LegendEntry[] entries = mEntries;
         int entryCount = entries.length;
@@ -907,7 +906,7 @@ public class Legend extends ComponentBase {
 
                         width += Utils.calcTextWidth(labelpaint, label);
 
-                        if (i < entryCount - 1)
+                        if (i < entryCount)
                             maxHeight += labelLineHeight + yEntrySpace;
                     } else {
                         wasStacked = true;

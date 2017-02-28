@@ -43,7 +43,7 @@ public class ScatterChartRenderer extends LineScatterCandleRadarRenderer {
         }
     }
 
-    float[] mPixelBuffer = new float[2];
+    protected float[] mPixelBuffer = new float[2];
 
     protected void drawDataSet(Canvas c, IScatterDataSet dataSet) {
 

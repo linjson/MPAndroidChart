@@ -21,6 +21,7 @@ import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.components.YAxis.AxisDependency;
 import com.github.mikephil.charting.data.BarLineScatterCandleBubbleData;
 import com.github.mikephil.charting.data.Entry;
+import com.github.mikephil.charting.data.ScatterData;
 import com.github.mikephil.charting.highlight.ChartHighlighter;
 import com.github.mikephil.charting.highlight.Highlight;
 import com.github.mikephil.charting.interfaces.dataprovider.BarLineScatterCandleBubbleDataProvider;
@@ -230,7 +231,24 @@ public abstract class BarLineChartBase<T extends BarLineScatterCandleBubbleData<
 
         // make sure the data cannot be drawn outside the content-rect
         int clipRestoreCount = canvas.save();
-        canvas.clipRect(mViewPortHandler.getContentRect());
+        if (this instanceof ScatterChart) {
+            ScatterChart chart = (ScatterChart) this;
+            ScatterData scatter = chart.getScatterData();
+
+            int count = scatter != null && scatter.getDataSets() != null ? scatter.getDataSets().size() : 0;
+
+            float max = 0;
+            for (int i = 0; i < count; i++) {
+                float m = scatter.getDataSets().get(i).getScatterShapeSize();
+                max = Math.max(m, max);
+            }
+
+            RectF rect = new RectF(mViewPortHandler.getContentRect());
+            rect.inset(-max, -max);
+            canvas.clipRect(rect);
+        } else {
+            canvas.clipRect(mViewPortHandler.getContentRect());
+        }
 
         mRenderer.drawData(canvas);
 
@@ -347,7 +365,6 @@ public abstract class BarLineChartBase<T extends BarLineScatterCandleBubbleData<
 
         final float fromX = getLowestVisibleX();
         final float toX = getHighestVisibleX();
-
 
 
         mData.calcMinMaxY(fromX, toX);
@@ -1176,7 +1193,7 @@ public abstract class BarLineChartBase<T extends BarLineScatterCandleBubbleData<
 
     /**
      * When enabled, the values will be clipped to contentRect,
-     *   otherwise they can bleed outside the content rect.
+     * otherwise they can bleed outside the content rect.
      *
      * @param enabled
      */
@@ -1186,7 +1203,7 @@ public abstract class BarLineChartBase<T extends BarLineScatterCandleBubbleData<
 
     /**
      * When enabled, the values will be clipped to contentRect,
-     *   otherwise they can bleed outside the content rect.
+     * otherwise they can bleed outside the content rect.
      *
      * @return
      */
@@ -1660,7 +1677,7 @@ public abstract class BarLineChartBase<T extends BarLineScatterCandleBubbleData<
                 if (e == null || e.getX() != mIndicesToHighlight[i].getX())
                     continue;
 
-                float[] pos = getMarkerPosition( highlight);
+                float[] pos = getMarkerPosition(highlight);
 
                 // check bounds
                 if (!mViewPortHandler.isInBounds(pos[0], pos[1]))
@@ -1732,15 +1749,12 @@ public abstract class BarLineChartBase<T extends BarLineScatterCandleBubbleData<
         }
 
 
-        float[] pos = getMarkerPosition( highlight);
+        float[] pos = getMarkerPosition(highlight);
 
         // check bounds
         if (!mViewPortHandler.isInBounds(pos[0], pos[1])) {
             return;
         }
-
-
-
 
 
         markerView.refreshContent(mData.getDataSetLabels()[highlight.getDataSetIndex()], labels, entries, highlight);
