@@ -390,7 +390,7 @@ public abstract class Chart<T extends ChartData<? extends IDataSet<? extends Ent
     /**
      * flag that indicates if offsets calculation has already been done or not
      */
-    private boolean mOffsetsCalculated = false;
+    protected boolean mOffsetsCalculated = false;
 
     @Override
     protected void onDraw(Canvas canvas) {
