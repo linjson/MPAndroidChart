@@ -8,7 +8,7 @@ buildscript {
     }
     dependencies {
         classpath "io.realm:realm-gradle-plugin:2.0.2"
-        classpath 'com.android.tools.build:gradle:2.2.3'
+        classpath 'com.android.tools.build:gradle:2.3.0'
         classpath 'com.github.dcendents:android-maven-gradle-plugin:1.3'
     }
 }
@@ -16,5 +16,12 @@ buildscript {
 allprojects {
     repositories {
         jcenter()
+        flatDir {
+            dirs '../libs/aar'
+        }
+        maven {
+//         All of React Native (JS, Obj-C sources, Android binaries) is installed from npm
+            url "/Volumes/project/apexsoft/git/MyStock/submodule/react-native/android"
+        }
     }
 }
