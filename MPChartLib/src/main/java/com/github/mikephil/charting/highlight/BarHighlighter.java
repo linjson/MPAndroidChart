@@ -20,15 +20,16 @@ public class BarHighlighter extends ChartHighlighter<BarDataProvider> {
     public Highlight getHighlight(float x, float y) {
         Highlight high = super.getHighlight(x, y);
 
-        if(high == null) {
+        if (high == null) {
             return null;
         }
 
-        MPPointD pos = getValsForTouch(x, y);
 
         BarData barData = mChart.getBarData();
 
         IBarDataSet set = barData.getDataSetByIndex(high.getDataSetIndex());
+        MPPointD pos = getValsForTouch(x, y, set.getAxisDependency());
+
         if (set.isStacked()) {
 
             return getStackedHighlight(high,

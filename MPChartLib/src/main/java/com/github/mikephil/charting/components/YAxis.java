@@ -326,8 +326,10 @@ public class YAxis extends AxisBase {
 
         p.setTextSize(mTextSize);
 
-        String label = getLongestLabel();
-        return (float) Utils.calcTextHeight(p, label) + getYOffset() * 2f;
+        return Utils.getLineHeight(p)+getYOffset() * 2f;
+//        String label = getLongestLabel();
+//
+//        return (float) Utils.calcTextHeight(p, label) + getYOffset() * 2f;
     }
 
     /**

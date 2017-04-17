@@ -32,6 +32,8 @@ public class BarEntry extends Entry {
      */
     private float mPositiveSum;
 
+    private float barXindex;
+
     /**
      * Constructor for stacked bar entries.
      *
@@ -40,7 +42,7 @@ public class BarEntry extends Entry {
      */
     public BarEntry(float x, float[] vals) {
         super(x, calcSum(vals));
-
+        this.barXindex = x;
         this.mYVals = vals;
         calcPosNegSum();
         calcRanges();
@@ -54,6 +56,7 @@ public class BarEntry extends Entry {
      */
     public BarEntry(float x, float y) {
         super(x, y);
+        this.barXindex = x;
     }
 
     /**
@@ -65,7 +68,7 @@ public class BarEntry extends Entry {
      */
     public BarEntry(float x, float[] vals, String label) {
         super(x, calcSum(vals), label);
-
+        this.barXindex = x;
         this.mYVals = vals;
         calcPosNegSum();
         calcRanges();
@@ -80,6 +83,7 @@ public class BarEntry extends Entry {
      */
     public BarEntry(float x, float y, Object data) {
         super(x, y, data);
+        this.barXindex = x;
     }
 
     /**
@@ -88,6 +92,7 @@ public class BarEntry extends Entry {
     public BarEntry copy() {
 
         BarEntry copied = new BarEntry(getX(), getY(), getData());
+        copied.barXindex = getBarXindex();
         copied.setVals(mYVals);
         return copied;
     }
@@ -249,6 +254,10 @@ public class BarEntry extends Entry {
                 posRemain += value;
             }
         }
+    }
+
+    public float getBarXindex() {
+        return barXindex;
     }
 }
 

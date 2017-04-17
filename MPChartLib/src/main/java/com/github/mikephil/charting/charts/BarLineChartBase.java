@@ -513,10 +513,14 @@ public abstract class BarLineChartBase<T extends BarLineScatterCandleBubbleData<
                 }
             }
 
-            offsetTop = Math.max(offsetTop, getExtraTopOffset());
-            offsetRight = Math.max(offsetRight, getExtraRightOffset());
-            offsetBottom = Math.max(offsetBottom, getExtraBottomOffset());
-            offsetLeft = Math.max(offsetLeft, getExtraLeftOffset());
+//            offsetTop = Math.max(offsetTop, getExtraTopOffset());
+//            offsetRight = Math.max(offsetRight, getExtraRightOffset());
+//            offsetBottom = Math.max(offsetBottom, getExtraBottomOffset());
+//            offsetLeft = Math.max(offsetLeft, getExtraLeftOffset());
+            offsetTop += getExtraTopOffset();
+            offsetRight += getExtraRightOffset();
+            offsetBottom += getExtraBottomOffset();
+            offsetLeft += getExtraLeftOffset();
 
             float minOffset = Utils.convertDpToPixel(mMinOffset);
 
@@ -1691,7 +1695,7 @@ public abstract class BarLineChartBase<T extends BarLineScatterCandleBubbleData<
                 }
 
 
-                markerView.refreshContent(e, highlight);
+                markerView.refreshContent(e, highlight,mData.getDataSets().get(highlight.getDataSetIndex()).getValueFormatter());
 
                 markerView.measure(MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED),
                         MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED));
@@ -1757,7 +1761,8 @@ public abstract class BarLineChartBase<T extends BarLineScatterCandleBubbleData<
         }
 
 
-        markerView.refreshContent(mData.getDataSetLabels()[highlight.getDataSetIndex()], labels, entries, highlight);
+        int dataSetIndex = highlight.getDataSetIndex();
+        markerView.refreshContent(mData.getDataSetLabels()[dataSetIndex], labels, entries, highlight,mData.getDataSets().get(dataSetIndex).getValueFormatter());
 
         markerView.measure(MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED),
                 MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED));

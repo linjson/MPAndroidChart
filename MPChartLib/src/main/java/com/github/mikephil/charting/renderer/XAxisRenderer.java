@@ -84,7 +84,7 @@ public class XAxisRenderer extends AxisRenderer {
         final FSize labelSize = Utils.calcTextSize(mAxisLabelPaint, longest);
 
         final float labelWidth = labelSize.width;
-        final float labelHeight = Utils.calcTextHeight(mAxisLabelPaint, "Q");
+        final float labelHeight = Utils.getLineHeight(mAxisLabelPaint);// Utils.calcTextHeight(mAxisLabelPaint, "Q");
 
         final FSize labelRotatedSize = Utils.getSizeOfRotatedRectangleByDegrees(
                 labelWidth,
@@ -126,7 +126,7 @@ public class XAxisRenderer extends AxisRenderer {
 
         } else if (mXAxis.getPosition() == XAxisPosition.BOTTOM) {
             pointF.x = 0.5f;
-            pointF.y = 0.2f;
+            pointF.y = 0f;
             drawLabels(c, mViewPortHandler.contentBottom() + yoffset, pointF);
 
         } else if (mXAxis.getPosition() == XAxisPosition.BOTTOM_INSIDE) {

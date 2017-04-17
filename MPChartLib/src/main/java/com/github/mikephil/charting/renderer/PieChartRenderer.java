@@ -56,7 +56,7 @@ public class PieChartRenderer extends DataRenderer {
     /**
      * paint object used for drwing the slice-text
      */
-    private Paint mEntryLabelsPaint;
+    protected Paint mEntryLabelsPaint;
 
     private StaticLayout mCenterTextLayout;
     private CharSequence mCenterTextLastValue;

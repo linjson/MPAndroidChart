@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 
 import com.github.mikephil.charting.data.Entry;
+import com.github.mikephil.charting.formatter.IValueFormatter;
 import com.github.mikephil.charting.highlight.Highlight;
 
 /**
@@ -49,6 +50,6 @@ public abstract class FixedMarkerView extends ChartMarkerView {
     }
 
 
-    public abstract void refreshContent(String xVal, String[] labels, Entry[] entries, Highlight highlight);
+    public abstract void refreshContent(String xVal, String[] labels, Entry[] entries, Highlight highlight, IValueFormatter formatter);
 
 }
