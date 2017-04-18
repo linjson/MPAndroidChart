@@ -312,8 +312,8 @@ public abstract class AxisBase extends ComponentBase {
 
         if (count > 25)
             count = 25;
-        if (count < 2)
-            count = 2;
+        if (count < 1)
+            count = 1;
 
         mLabelCount = count;
         mForceLabels = false;

@@ -66,12 +66,16 @@ public class ChartAnimator {
         animatorX.setDuration(
                 durationMillisX);
 
+
+
         // make sure only one animator produces update-callbacks (which then
         // call invalidate())
         if (durationMillisX > durationMillisY) {
             animatorX.addUpdateListener(mListener);
+            addAnimatorListener(animatorX);
         } else {
             animatorY.addUpdateListener(mListener);
+            addAnimatorListener(animatorY);
         }
 
         animatorX.start();
@@ -95,6 +99,7 @@ public class ChartAnimator {
         animatorX.setInterpolator(easing);
         animatorX.setDuration(durationMillis);
         animatorX.addUpdateListener(mListener);
+        addAnimatorListener(animatorX);
         animatorX.start();
     }
 
@@ -115,6 +120,7 @@ public class ChartAnimator {
         animatorY.setInterpolator(easing);
         animatorY.setDuration(durationMillis);
         animatorY.addUpdateListener(mListener);
+        addAnimatorListener(animatorY);
         animatorY.start();
     }
 
@@ -152,8 +158,10 @@ public class ChartAnimator {
         // call invalidate())
         if (durationMillisX > durationMillisY) {
             animatorX.addUpdateListener(mListener);
+            addAnimatorListener(animatorX);
         } else {
             animatorY.addUpdateListener(mListener);
+            addAnimatorListener(animatorY);
         }
 
         animatorX.start();
@@ -177,6 +185,7 @@ public class ChartAnimator {
         animatorX.setInterpolator(Easing.getEasingFunctionFromOption(easing));
         animatorX.setDuration(durationMillis);
         animatorX.addUpdateListener(mListener);
+        addAnimatorListener(animatorX);
         animatorX.start();
     }
 
@@ -197,6 +206,7 @@ public class ChartAnimator {
         animatorY.setInterpolator(Easing.getEasingFunctionFromOption(easing));
         animatorY.setDuration(durationMillis);
         animatorY.addUpdateListener(mListener);
+        addAnimatorListener(animatorY);
         animatorY.start();
     }
 
@@ -229,8 +239,10 @@ public class ChartAnimator {
         // call invalidate())
         if (durationMillisX > durationMillisY) {
             animatorX.addUpdateListener(mListener);
+            addAnimatorListener(animatorX);
         } else {
             animatorY.addUpdateListener(mListener);
+            addAnimatorListener(animatorY);
         }
 
         animatorX.start();
@@ -252,6 +264,7 @@ public class ChartAnimator {
         ObjectAnimator animatorX = ObjectAnimator.ofFloat(this, "phaseX", 0f, 1f);
         animatorX.setDuration(durationMillis);
         animatorX.addUpdateListener(mListener);
+        addAnimatorListener(animatorX);
         animatorX.start();
     }
 
@@ -270,6 +283,7 @@ public class ChartAnimator {
         ObjectAnimator animatorY = ObjectAnimator.ofFloat(this, "phaseY", 0f, 1f);
         animatorY.setDuration(durationMillis);
         animatorY.addUpdateListener(mListener);
+        addAnimatorListener(animatorY);
         animatorY.start();
     }
 

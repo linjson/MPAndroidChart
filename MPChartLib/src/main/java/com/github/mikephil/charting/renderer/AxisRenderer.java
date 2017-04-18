@@ -189,6 +189,9 @@ public abstract class AxisRenderer extends Renderer {
         if (mAxis.isForceLabelsEnabled()) {
 
             interval = (float) range / (float) (labelCount - 1);
+            if (Double.isInfinite(interval)) {
+                interval = 1;
+            }
             mAxis.mEntryCount = labelCount;
 
             if (mAxis.mEntries.length < labelCount) {
