@@ -7,6 +7,7 @@ import android.graphics.Paint.Align;
 import android.graphics.Path;
 import android.graphics.RectF;
 
+import com.github.mikephil.charting.components.AxisBase;
 import com.github.mikephil.charting.components.LimitLine;
 import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.components.YAxis.AxisDependency;
@@ -29,7 +30,7 @@ public class YAxisRenderer extends AxisRenderer {
 
         this.mYAxis = yAxis;
 
-        if(mViewPortHandler != null) {
+        if (mViewPortHandler != null) {
 
             mAxisLabelPaint.setColor(Color.BLACK);
             mAxisLabelPaint.setTextSize(Utils.convertDpToPixel(10f));
@@ -68,9 +69,11 @@ public class YAxisRenderer extends AxisRenderer {
 
             if (labelPosition == YAxisLabelPosition.OUTSIDE_CHART) {
                 mAxisLabelPaint.setTextAlign(Align.RIGHT);
+                mTitlePaint.setTextAlign(Align.RIGHT);
                 xPos = mViewPortHandler.offsetLeft() - xoffset;
             } else {
                 mAxisLabelPaint.setTextAlign(Align.LEFT);
+                mTitlePaint.setTextAlign(Align.LEFT);
                 xPos = mViewPortHandler.offsetLeft() + xoffset;
             }
 
@@ -78,14 +81,35 @@ public class YAxisRenderer extends AxisRenderer {
 
             if (labelPosition == YAxisLabelPosition.OUTSIDE_CHART) {
                 mAxisLabelPaint.setTextAlign(Align.LEFT);
+                mTitlePaint.setTextAlign(Align.LEFT);
                 xPos = mViewPortHandler.contentRight() + xoffset;
             } else {
                 mAxisLabelPaint.setTextAlign(Align.RIGHT);
+                mTitlePaint.setTextAlign(Align.RIGHT);
                 xPos = mViewPortHandler.contentRight() - xoffset;
             }
         }
 
         drawYLabels(c, xPos, positions, yoffset);
+        drawTitle(c, xPos, positions, yoffset);
+    }
+
+    protected void drawTitle(Canvas c, float xPos, float[] positions, float offset) {
+
+        if (!mAxis.drawTitleEnabled()) {
+            return;
+        }
+
+        final String title = mAxis.getTitle();
+        final int pos = mAxis.getTitlePosition();
+        mTitlePaint.setColor(mAxis.getTitleColor());
+        float x = xPos + mAxis.getXTitleOffset();
+        if (pos == AxisBase.Y_TITLEPOSITION_BOTTOM) {
+            c.drawText(title, x, mViewPortHandler.contentBottom() + offset + Utils.calcTextHeight(mTitlePaint, title) + mAxis.getYTitleOffset(), mTitlePaint);
+        } else if (pos == AxisBase.Y_TITLEPOSITION_TOP) {
+            c.drawText(title, x, mViewPortHandler.contentTop() - Utils.calcTextHeight(mAxisLabelPaint, title) / 2 - offset - mAxis.getYTitleOffset(), mTitlePaint);
+        }
+
     }
 
     @Override
@@ -127,6 +151,7 @@ public class YAxisRenderer extends AxisRenderer {
     }
 
     protected Path mRenderGridLinesPath = new Path();
+
     @Override
     public void renderGridLines(Canvas c) {
 
@@ -188,6 +213,7 @@ public class YAxisRenderer extends AxisRenderer {
     }
 
     protected float[] mGetTransformedPositionsBuffer = new float[2];
+
     /**
      * Transforms the values contained in the axis entries to screen pixels and returns them in form of a float array
      * of x- and y-coordinates.
@@ -196,7 +222,7 @@ public class YAxisRenderer extends AxisRenderer {
      */
     protected float[] getTransformedPositions() {
 
-        if(mGetTransformedPositionsBuffer.length != mYAxis.mEntryCount * 2){
+        if (mGetTransformedPositionsBuffer.length != mYAxis.mEntryCount * 2) {
             mGetTransformedPositionsBuffer = new float[mYAxis.mEntryCount * 2];
         }
         float[] positions = mGetTransformedPositionsBuffer;
@@ -244,6 +270,7 @@ public class YAxisRenderer extends AxisRenderer {
     protected Path mRenderLimitLines = new Path();
     protected float[] mRenderLimitLinesBuffer = new float[2];
     protected RectF mLimitLineClippingRect = new RectF();
+
     /**
      * Draws the LimitLines associated with this axis to the screen.
      *
@@ -342,4 +369,10 @@ public class YAxisRenderer extends AxisRenderer {
             c.restoreToCount(clipRestoreCount);
         }
     }
+
+    @Override
+    protected void computeAxisValues(float min, float max) {
+        super.computeAxisValues(min, max);
+    }
+
 }

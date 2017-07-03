@@ -3,10 +3,14 @@ package com.github.mikephil.charting.components;
 
 import android.graphics.Color;
 import android.graphics.DashPathEffect;
+import android.graphics.Paint;
+import android.graphics.Typeface;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.github.mikephil.charting.formatter.DefaultAxisValueFormatter;
 import com.github.mikephil.charting.formatter.IAxisValueFormatter;
+import com.github.mikephil.charting.utils.FSize;
 import com.github.mikephil.charting.utils.Utils;
 
 import java.util.ArrayList;
@@ -758,5 +762,96 @@ public abstract class AxisBase extends ComponentBase {
      */
     public void setSpaceMax(float mSpaceMax) {
         this.mSpaceMax = mSpaceMax;
+    }
+
+    protected String mTitle;
+    protected int mTitlePosition;
+    protected float mXTitleOffset;
+    protected float mYTitleOffset;
+    protected int mTitleColor = Color.GRAY;
+    protected float mTitleSize = Utils.convertDpToPixel(12);
+    protected Typeface mTitleTypeface;
+    public final static int X_TITLEPOSITION_LEFT = 1;
+    public final static int X_TITLEPOSITION_RIGHT = 2;
+    public final static int Y_TITLEPOSITION_BOTTOM = 3;
+    public final static int Y_TITLEPOSITION_TOP = 4;
+
+
+    public void setTitle(String title) {
+        mTitle = title;
+    }
+
+    public void setTitlePosition(int titlePosition) {
+        mTitlePosition = titlePosition;
+    }
+
+    public String getTitle() {
+        return mTitle;
+    }
+
+    public int getTitlePosition() {
+        return mTitlePosition;
+    }
+
+    public boolean drawTitleEnabled() {
+        return !TextUtils.isEmpty(mTitle);
+    }
+
+    public float getXTitleOffset() {
+        return mXTitleOffset;
+    }
+
+    public void setXTitleOffset(float xTitleOffset) {
+        this.mXTitleOffset = Utils.convertDpToPixel(xTitleOffset);
+    }
+
+    public float getYTitleOffset() {
+        return mYTitleOffset;
+    }
+
+    public void setYTitleOffset(float yTitleOffset) {
+        this.mYTitleOffset = Utils.convertDpToPixel(yTitleOffset);
+    }
+
+    public FSize getTitleSize(Paint p) {
+
+        FSize size = FSize.getInstance(0, 0);
+
+        if (!drawTitleEnabled()) {
+            return size;
+        }
+        p.setTextSize(mTitleSize);
+        p.setTypeface(mTitleTypeface);
+        float height = Utils.calcTextHeight(p, mTitle) + Utils.getLineHeight(p) / 2f;
+
+        float width = Utils.calcTextWidth(p, mTitle);
+
+        size.width = width;
+        size.height = height;
+        return size;
+    }
+
+    public void setTitleColor(int titleColor) {
+        mTitleColor = titleColor;
+    }
+
+    public void setTitleSize(float titleSize) {
+        mTitleSize = Utils.convertDpToPixel(titleSize);
+    }
+
+    public void setTitleTypeface(Typeface titleTypeface) {
+        mTitleTypeface = titleTypeface;
+    }
+
+    public int getTitleColor() {
+        return mTitleColor;
+    }
+
+    public float getTitleSize() {
+        return mTitleSize;
+    }
+
+    public Typeface getTitleTypeface() {
+        return mTitleTypeface;
     }
 }

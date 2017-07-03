@@ -63,12 +63,19 @@ public class LineDataSet extends LineRadarDataSet<Entry> implements ILineDataSet
     private boolean mDrawCircles = true;
 
     private boolean mDrawCircleHole = true;
+    private int[] selectXIndexes;
+    private float selectCircleRadius;
+    private int selectCircleColor;
+    private int mHighlightCircleColor;
+    private float mHighlightCircleRadius;
+    private int mHighlightTransparentCircleColor;
+    private float mHighlightTransparentCircleRadius;
 
 
     public LineDataSet(List<Entry> yVals, String label) {
         super(yVals, label);
 
-        // mCircleRadius = Utils.convertDpToPixel(4f);
+         mCircleRadius = Utils.convertDpToPixel(6f);
         // mLineWidth = Utils.convertDpToPixel(1f);
 
         if (mCircleColors == null) {
@@ -101,6 +108,9 @@ public class LineDataSet extends LineRadarDataSet<Entry> implements ILineDataSet
         copied.mDrawCircles = mDrawCircles;
         copied.mDrawCircleHole = mDrawCircleHole;
         copied.mHighLightColor = mHighLightColor;
+        copied.selectXIndexes = selectXIndexes;
+        copied.selectCircleColor = selectCircleColor;
+        copied.selectCircleRadius = selectCircleRadius;
 
         return copied;
     }
@@ -406,10 +416,71 @@ public class LineDataSet extends LineRadarDataSet<Entry> implements ILineDataSet
         return mFillFormatter;
     }
 
+    @Override
+    public int[] getSelectXIndexes() {
+        return selectXIndexes;
+    }
+
+    @Override
+    public float getSelectCircleRadius() {
+        return selectCircleRadius;
+    }
+
+    @Override
+    public int getSelectCircleColor() {
+        return selectCircleColor;
+    }
+
+    public void setSelectXIndexes(int[] x) {
+        selectXIndexes = x;
+    }
+
+    public void setSelectCircleRadius(float radius) {
+        selectCircleRadius = Utils.convertDpToPixel(radius);
+    }
+
+    public void setSelectCircleColor(int color) {
+        selectCircleColor = color;
+    }
+
+
     public enum Mode {
         LINEAR,
         STEPPED,
         CUBIC_BEZIER,
         HORIZONTAL_BEZIER
+    }
+
+
+    public void setHighlightCircleColor(int highlightCircleColor) {
+        mHighlightCircleColor = highlightCircleColor;
+    }
+
+    public int getHighlightCircleColor() {
+        return mHighlightCircleColor;
+    }
+
+    public void setHighlightCircleRadius(float highlightCircleRadius) {
+        mHighlightCircleRadius = Utils.convertDpToPixel(highlightCircleRadius);
+    }
+
+    public float getHighlightCircleRadius() {
+        return mHighlightCircleRadius;
+    }
+
+    public void setHighlightTransparentCircleColor(int highlightTransparentCircleColor) {
+        mHighlightTransparentCircleColor = highlightTransparentCircleColor;
+    }
+
+    public int getHighlightTransparentCircleColor() {
+        return mHighlightTransparentCircleColor;
+    }
+
+    public void setHighlightTransparentCircleRadius(float highlightTransparentCircleRadius) {
+        mHighlightTransparentCircleRadius = Utils.convertDpToPixel(highlightTransparentCircleRadius);
+    }
+
+    public float getHighlightTransparentCircleRadius() {
+        return mHighlightTransparentCircleRadius;
     }
 }

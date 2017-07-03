@@ -7,6 +7,7 @@ import android.graphics.Paint;
 import android.graphics.Paint.Align;
 import android.graphics.Path;
 import android.graphics.Typeface;
+import android.text.TextUtils;
 
 import com.github.mikephil.charting.components.Legend;
 import com.github.mikephil.charting.components.LegendEntry;
@@ -141,7 +142,7 @@ public class LegendRenderer extends Renderer {
                         ));
                     }
 
-                    if (pds.getLabel() != null) {
+                    if (!TextUtils.isEmpty(pds.getLabel())) {
                         // add the legend description label
                         computedEntries.add(new LegendEntry(
                                 dataSet.getLabel(),
@@ -151,7 +152,7 @@ public class LegendRenderer extends Renderer {
                                 null,
                                 ColorTemplate.COLOR_NONE
                         ));
-                   }
+                    }
                 } else if (dataSet instanceof IXPieDataSet) {
 
                     IXPieDataSet pds = (IXPieDataSet) dataSet;
@@ -168,7 +169,7 @@ public class LegendRenderer extends Renderer {
                         ));
                     }
 
-                    if (pds.getLabel() != null) {
+                    if (!TextUtils.isEmpty(pds.getLabel())) {
                         // add the legend description label
                         computedEntries.add(new LegendEntry(
                                 dataSet.getLabel(),
@@ -263,10 +264,10 @@ public class LegendRenderer extends Renderer {
         mLegendLabelPaint.setTextSize(mLegend.getTextSize());
         mLegendLabelPaint.setColor(mLegend.getTextColor());
 
-        float labelLineHeight = Utils.getLineHeight(mLegendLabelPaint, legendFontMetrics);
+        float labelLineHeight = Utils.getLineHeight(mLegendLabelPaint,legendFontMetrics);
         float labelLineSpacing = Utils.getLineSpacing(mLegendLabelPaint, legendFontMetrics)
                 + Utils.convertDpToPixel(mLegend.getYEntrySpace());
-        float formYOffset = labelLineHeight - (mLegend.getYEntrySpace()==0?Utils.calcTextHeight(mLegendLabelPaint, "ABC") / 2.f:Utils.convertDpToPixel(mLegend.getYEntrySpace()));
+        float formYOffset = labelLineHeight - (mLegend.getYEntrySpace() == 0 ? Utils.calcTextHeight(mLegendLabelPaint, "ABC") / 2.f : Utils.convertDpToPixel(mLegend.getYEntrySpace()));
 
         LegendEntry[] entries = mLegend.getEntries();
 
@@ -345,11 +346,11 @@ public class LegendRenderer extends Renderer {
 
                 switch (verticalAlignment) {
                     case TOP:
-                        posY = yoffset;
+                        posY = yoffset-legendFontMetrics.descent;
                         break;
 
                     case BOTTOM:
-                        posY = mViewPortHandler.getChartHeight() - yoffset - mLegend.mNeededHeight;
+                        posY = mViewPortHandler.getChartHeight() - yoffset - mLegend.mNeededHeight-legendFontMetrics.descent;
                         break;
 
                     case CENTER:
@@ -550,8 +551,7 @@ public class LegendRenderer extends Renderer {
                 c.drawRect(x, y - half, x + formSize, y + half, mLegendFormPaint);
                 break;
 
-            case LINE:
-            {
+            case LINE: {
                 final float formLineWidth = Utils.convertDpToPixel(
                         Float.isNaN(entry.formLineWidth)
                                 ? legend.getFormLineWidth()
@@ -568,7 +568,7 @@ public class LegendRenderer extends Renderer {
                 mLineFormPath.lineTo(x + formSize, y);
                 c.drawPath(mLineFormPath, mLegendFormPaint);
             }
-                break;
+            break;
         }
 
         c.restoreToCount(restoreCount);

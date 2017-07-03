@@ -63,6 +63,7 @@ public class XAxis extends AxisBase {
         super();
 
         mYOffset = Utils.convertDpToPixel(4.f); // -3
+        mTitlePosition =X_TITLEPOSITION_RIGHT;
     }
 
     /**

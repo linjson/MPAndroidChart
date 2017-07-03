@@ -16,7 +16,8 @@ import android.view.MotionEvent;
 import android.view.ViewGroup;
 import android.view.ViewParent;
 
-import com.github.mikephil.charting.components.XAxis.XAxisPosition;
+import com.github.mikephil.charting.components.AxisBase;
+import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.components.YAxis.AxisDependency;
 import com.github.mikephil.charting.data.BarLineScatterCandleBubbleData;
@@ -34,14 +35,16 @@ import com.github.mikephil.charting.listener.BarLineChartTouchListener;
 import com.github.mikephil.charting.listener.OnDrawListener;
 import com.github.mikephil.charting.renderer.XAxisRenderer;
 import com.github.mikephil.charting.renderer.YAxisRenderer;
-import com.github.mikephil.charting.sharechart.extend.ArrowMarkerView;
+import com.github.mikephil.charting.sharechart.drawable.ArrowShadowBitmap;
 import com.github.mikephil.charting.sharechart.extend.ChartMarkerView;
 import com.github.mikephil.charting.sharechart.extend.ChartUtils;
-import com.github.mikephil.charting.sharechart.extend.FixedMarkerView;
+import com.github.mikephil.charting.utils.FSize;
 import com.github.mikephil.charting.utils.MPPointD;
 import com.github.mikephil.charting.utils.MPPointF;
 import com.github.mikephil.charting.utils.Transformer;
 import com.github.mikephil.charting.utils.Utils;
+
+import java.util.Arrays;
 
 /**
  * Base-class of LineChart, BarChart, ScatterChart and CandleStickChart.
@@ -138,6 +141,7 @@ public abstract class BarLineChartBase<T extends BarLineScatterCandleBubbleData<
     protected Transformer mRightAxisTransformer;
 
     protected XAxisRenderer mXAxisRenderer;
+    protected boolean highlightAllEnabled;
 
     // /** the approximator object used for data filtering */
     // private Approximator mApproximator;
@@ -208,9 +212,6 @@ public abstract class BarLineChartBase<T extends BarLineScatterCandleBubbleData<
         if (mXAxis.isEnabled())
             mXAxisRenderer.computeAxis(mXAxis.mAxisMinimum, mXAxis.mAxisMaximum, false);
 
-        mXAxisRenderer.renderAxisLine(canvas);
-        mAxisRendererLeft.renderAxisLine(canvas);
-        mAxisRendererRight.renderAxisLine(canvas);
 
         if (mAutoScaleMinMaxEnabled) {
             autoScale();
@@ -219,6 +220,11 @@ public abstract class BarLineChartBase<T extends BarLineScatterCandleBubbleData<
         mXAxisRenderer.renderGridLines(canvas);
         mAxisRendererLeft.renderGridLines(canvas);
         mAxisRendererRight.renderGridLines(canvas);
+
+
+        mXAxisRenderer.renderAxisLine(canvas);
+        mAxisRendererLeft.renderAxisLine(canvas);
+        mAxisRendererRight.renderAxisLine(canvas);
 
         if (mXAxis.isDrawLimitLinesBehindDataEnabled())
             mXAxisRenderer.renderLimitLines(canvas);
@@ -290,7 +296,7 @@ public abstract class BarLineChartBase<T extends BarLineScatterCandleBubbleData<
         drawDescription(canvas);
 
         drawMarkers(canvas);
-        drawChartMarker(canvas);
+        drawChartMarkerView(canvas);
         if (mLogEnabled) {
             long drawtime = (System.currentTimeMillis() - starttime);
             totalTime += drawtime;
@@ -438,15 +444,17 @@ public abstract class BarLineChartBase<T extends BarLineScatterCandleBubbleData<
                     break;
 
                 case HORIZONTAL:
-
+                    float offset = Utils.convertDpToPixel(3);
                     switch (mLegend.getVerticalAlignment()) {
                         case TOP:
                             offsets.top += Math.min(mLegend.mNeededHeight,
                                     mViewPortHandler.getChartHeight() * mLegend.getMaxSizePercent())
                                     + mLegend.getYOffset();
 
-                            if (getXAxis().isEnabled() && getXAxis().isDrawLabelsEnabled())
-                                offsets.top += getXAxis().mLabelRotatedHeight;
+                            if (getXAxis().isEnabled() && getXAxis().isDrawLabelsEnabled()){
+                                offsets.top += offset;
+                            }
+
                             break;
 
                         case BOTTOM:
@@ -454,8 +462,10 @@ public abstract class BarLineChartBase<T extends BarLineScatterCandleBubbleData<
                                     mViewPortHandler.getChartHeight() * mLegend.getMaxSizePercent())
                                     + mLegend.getYOffset();
 
-                            if (getXAxis().isEnabled() && getXAxis().isDrawLabelsEnabled())
-                                offsets.bottom += getXAxis().mLabelRotatedHeight;
+                            if (getXAxis().isEnabled() && getXAxis().isDrawLabelsEnabled()) {
+                                offsets.bottom += offset;
+                            }
+
                             break;
 
                         default:
@@ -474,7 +484,6 @@ public abstract class BarLineChartBase<T extends BarLineScatterCandleBubbleData<
         if (!mCustomViewPortEnabled) {
 
             float offsetLeft = 0f, offsetRight = 0f, offsetTop = 0f, offsetBottom = 0f;
-
             calculateLegendOffsets(mOffsetsBuffer);
 
             offsetLeft += mOffsetsBuffer.left;
@@ -482,36 +491,164 @@ public abstract class BarLineChartBase<T extends BarLineScatterCandleBubbleData<
             offsetRight += mOffsetsBuffer.right;
             offsetBottom += mOffsetsBuffer.bottom;
 
-            // offsets for y-labels
-            if (mAxisLeft.needsOffset()) {
-                offsetLeft += mAxisLeft.getRequiredWidthSpace(mAxisRendererLeft
-                        .getPaintAxisLabels());
+
+            //x->LT[0],LB[1],RB[2],RT[3],y->LT[4],LB[5],RB[6],RT[7]
+            //计算所有x,y轴title四个方位的大小
+            //最后上下左右边距取最大
+            FSize[] titleRect = new FSize[8];
+            for (int i = 0; i < titleRect.length; i++) {
+                titleRect[i] = FSize.getInstance(0, 0);
+            }
+            FSize size = null;
+            float leftNeedWidth = 0, rightNeedWidth = 0, topNeedHeight = 0, bottomNeedHeight = 0;
+
+            if (mAxisLeft.needsDraw()) {
+
+                final YAxis.YAxisLabelPosition pos = mAxisLeft.getLabelPosition();
+                size = mAxisLeft.getTitleSize(mAxisRendererLeft
+                        .getTitlePaint());
+
+                final boolean drawTitleEnabled = mAxisLeft.drawTitleEnabled();
+                final int titlePosition = mAxisLeft.getTitlePosition();
+                if (pos == YAxis.YAxisLabelPosition.INSIDE_CHART) {
+
+                    if (drawTitleEnabled) {
+                        if (titlePosition == AxisBase.Y_TITLEPOSITION_BOTTOM) {
+                            titleRect[5].height = size.height;
+                        } else {
+                            titleRect[4].height = size.height;
+                        }
+                    }
+                } else {
+                    leftNeedWidth = mAxisLeft.getRequiredWidthSpace(mAxisRendererLeft
+                            .getPaintAxisLabels());
+                    if (drawTitleEnabled) {
+                        if (titlePosition == AxisBase.Y_TITLEPOSITION_BOTTOM) {
+                            titleRect[5].set(size);
+                        } else {
+                            titleRect[4].set(size);
+                        }
+                    }
+
+
+                }
             }
 
-            if (mAxisRight.needsOffset()) {
-                offsetRight += mAxisRight.getRequiredWidthSpace(mAxisRendererRight
-                        .getPaintAxisLabels());
+            if (mAxisRight.needsDraw()) {
+                final YAxis.YAxisLabelPosition pos = mAxisRight.getLabelPosition();
+                size = mAxisRight.getTitleSize(mAxisRendererRight
+                        .getTitlePaint());
+
+                final boolean drawTitleEnabled = mAxisRight.drawTitleEnabled();
+                final int titlePosition = mAxisRight.getTitlePosition();
+                if (pos == YAxis.YAxisLabelPosition.INSIDE_CHART) {
+
+                    if (drawTitleEnabled) {
+                        if (titlePosition == AxisBase.Y_TITLEPOSITION_BOTTOM) {
+                            titleRect[6].height = size.height;
+                        } else {
+                            titleRect[7].height = size.height;
+                        }
+                    }
+                } else {
+                    rightNeedWidth = mAxisRight.getRequiredWidthSpace(mAxisRendererRight
+                            .getPaintAxisLabels());
+                    if (drawTitleEnabled) {
+
+                        if (titlePosition == AxisBase.Y_TITLEPOSITION_BOTTOM) {
+                            titleRect[6].set(size);
+                        } else {
+                            titleRect[7].set(size);
+                        }
+                    }
+                }
             }
 
             if (mXAxis.isEnabled() && mXAxis.isDrawLabelsEnabled()) {
+                final float xlabelheight = mXAxis.mLabelRotatedHeight + mXAxis.getYOffset();
+                final XAxis.XAxisPosition position = mXAxis.getPosition();
+                final boolean drawTitleEnabled = mXAxis.drawTitleEnabled();
+                if (position == XAxis.XAxisPosition.BOTTOM) {
+                    bottomNeedHeight = xlabelheight;
 
-                float xlabelheight = mXAxis.mLabelRotatedHeight + mXAxis.getYOffset();
+                    if (drawTitleEnabled) {
 
-                // offsets for x-labels
-                if (mXAxis.getPosition() == XAxisPosition.BOTTOM) {
+                        size = mXAxis.getTitleSize(mXAxisRenderer.getTitlePaint());
+                        if (mXAxis.getTitlePosition() == AxisBase.X_TITLEPOSITION_LEFT) {
+                            titleRect[1].set(size);
+                        } else {
+                            titleRect[2].set(size);
+                        }
+                    }
 
-                    offsetBottom += xlabelheight;
 
-                } else if (mXAxis.getPosition() == XAxisPosition.TOP) {
+                } else if (position == XAxis.XAxisPosition.TOP) {
+                    topNeedHeight = xlabelheight;
 
-                    offsetTop += xlabelheight;
+                    if (drawTitleEnabled) {
 
-                } else if (mXAxis.getPosition() == XAxisPosition.BOTH_SIDED) {
+                        size = mXAxis.getTitleSize(mXAxisRenderer.getTitlePaint());
+                        if (mXAxis.getTitlePosition() == AxisBase.X_TITLEPOSITION_LEFT) {
+                            titleRect[0].set(size);
+                        } else {
+                            titleRect[3].set(size);
+                        }
+                    }
 
-                    offsetBottom += xlabelheight;
-                    offsetTop += xlabelheight;
+                } else if (position == XAxis.XAxisPosition.BOTH_SIDED) {
+                    bottomNeedHeight = xlabelheight;
+                    topNeedHeight = xlabelheight;
+
+                    if (drawTitleEnabled) {
+
+                        size = mXAxis.getTitleSize(mXAxisRenderer.getTitlePaint());
+                        if (mXAxis.getTitlePosition() == AxisBase.X_TITLEPOSITION_LEFT) {
+                            titleRect[0].set(size);
+                            titleRect[1].set(size);
+                        } else {
+                            titleRect[3].set(size);
+                            titleRect[2].set(size);
+                        }
+                    }
+                } else if (position == XAxis.XAxisPosition.TOP_INSIDE) {
+                    if (drawTitleEnabled) {
+
+                        size = mXAxis.getTitleSize(mXAxisRenderer.getTitlePaint());
+                        if (mXAxis.getTitlePosition() == AxisBase.X_TITLEPOSITION_LEFT) {
+                            titleRect[0].width = size.width;
+                        } else {
+                            titleRect[3].width = size.width;
+                        }
+                    }
+                } else if (position == XAxis.XAxisPosition.BOTTOM_INSIDE) {
+                    if (drawTitleEnabled) {
+
+                        size = mXAxis.getTitleSize(mXAxisRenderer.getTitlePaint());
+                        if (mXAxis.getTitlePosition() == AxisBase.X_TITLEPOSITION_LEFT) {
+                            titleRect[1].width = size.width;
+                        } else {
+                            titleRect[2].width = size.width;
+                        }
+                    }
                 }
             }
+
+            final int max = 4;
+            final float[] allLeft = {leftNeedWidth, titleRect[4].width, titleRect[5].width, titleRect[1].width, titleRect[0].width};
+            final float[] allright = {rightNeedWidth, titleRect[6].width, titleRect[7].width, titleRect[2].width, titleRect[3].width};
+            final float[] alltop = {topNeedHeight, titleRect[0].height, titleRect[3].height, titleRect[4].height, titleRect[7].height};
+            final float[] allbottom = {bottomNeedHeight, titleRect[1].height, titleRect[2].height, titleRect[5].height, titleRect[6].height};
+
+            Arrays.sort(allLeft);
+            Arrays.sort(allright);
+            Arrays.sort(alltop);
+            Arrays.sort(allbottom);
+
+            offsetLeft += allLeft[max];
+            offsetRight += allright[max];
+            offsetTop += alltop[max];
+            offsetBottom += allbottom[max];
+
 
 //            offsetTop = Math.max(offsetTop, getExtraTopOffset());
 //            offsetRight = Math.max(offsetRight, getExtraRightOffset());
@@ -529,7 +666,10 @@ public abstract class BarLineChartBase<T extends BarLineScatterCandleBubbleData<
                     Math.max(minOffset, offsetTop),
                     Math.max(minOffset, offsetRight),
                     Math.max(minOffset, offsetBottom));
-
+            FSize.recycleInstances(Arrays.asList(titleRect));
+            if (size != null) {
+                FSize.recycleInstance(size);
+            }
             if (mLogEnabled) {
                 Log.i(LOG_TAG, "offsetLeft: " + offsetLeft + ", offsetTop: " + offsetTop
                         + ", offsetRight: " + offsetRight + ", offsetBottom: " + offsetBottom);
@@ -544,6 +684,7 @@ public abstract class BarLineChartBase<T extends BarLineScatterCandleBubbleData<
     /**
      * draws the grid background
      */
+
     protected void drawGridBackground(Canvas c) {
 
         if (mDrawGridBackground) {
@@ -1529,11 +1670,23 @@ public abstract class BarLineChartBase<T extends BarLineScatterCandleBubbleData<
 
     @Override
     public float getYChartMax() {
+        if (mAxisRight.isEnabled() && !mAxisLeft.isEnabled()) {
+            return mAxisRight.mAxisMaximum;
+        }
+        if (!mAxisRight.isEnabled() && mAxisLeft.isEnabled()) {
+            return mAxisLeft.mAxisMaximum;
+        }
         return Math.max(mAxisLeft.mAxisMaximum, mAxisRight.mAxisMaximum);
     }
 
     @Override
     public float getYChartMin() {
+        if (mAxisRight.isEnabled() && !mAxisLeft.isEnabled()) {
+            return mAxisRight.mAxisMinimum;
+        }
+        if (!mAxisRight.isEnabled() && mAxisLeft.isEnabled()) {
+            return mAxisLeft.mAxisMinimum;
+        }
         return Math.min(mAxisLeft.mAxisMinimum, mAxisRight.mAxisMinimum);
     }
 
@@ -1646,85 +1799,21 @@ public abstract class BarLineChartBase<T extends BarLineScatterCandleBubbleData<
 
     public void setChartMarkerView(ChartMarkerView chartMarkerView) {
         mChartMarkerView = chartMarkerView;
+        if (mChartMarkerView != null) {
+            mChartMarkerView.setChart(this);
+        }
     }
 
-    private void drawChartMarker(Canvas canvas) {
+
+    protected void drawChartMarkerView(Canvas canvas) {
 
         if (mChartMarkerView == null || !mDrawMarkers || !valuesToHighlight())
             return;
 
-        if (mChartMarkerView instanceof ArrowMarkerView) {
-            drawArrowMarker(canvas, (ArrowMarkerView) mChartMarkerView);
-        } else if (mChartMarkerView instanceof FixedMarkerView) {
-            drawFixedMarker(canvas, (FixedMarkerView) mChartMarkerView);
-        }
-
-    }
-
-    protected void drawArrowMarker(Canvas canvas, ArrowMarkerView markerView) {
+        ChartMarkerView markerView = mChartMarkerView;
 
 
-        for (int i = 0; i < mIndicesToHighlight.length; i++) {
-
-            Highlight highlight = mIndicesToHighlight[i];
-            float xIndex = highlight.getX();
-
-            float deltaX = mXAxis != null
-                    ? mXAxis.mAxisRange
-                    : ((mData == null ? 0.f : mData.getEntryCount()) - 1.f);
-
-            if (xIndex <= deltaX && xIndex <= deltaX * mAnimator.getPhaseX()) {
-
-                Entry e = mData.getEntryForHighlight(mIndicesToHighlight[i]);
-
-                // make sure entry not null
-                if (e == null || e.getX() != mIndicesToHighlight[i].getX())
-                    continue;
-
-                float[] pos = getMarkerPosition(highlight);
-
-                // check bounds
-                if (!mViewPortHandler.isInBounds(pos[0], pos[1]))
-                    continue;
-
-
-                if (pos[1] >= mViewPortHandler.getContentCenter().y) {
-                    markerView.setPosition(ArrowMarkerView.BOTTOM);
-                } else {
-                    markerView.setPosition(ArrowMarkerView.TOP);
-                }
-
-
-                markerView.refreshContent(e, highlight,mData.getDataSets().get(highlight.getDataSetIndex()).getValueFormatter());
-
-                markerView.measure(MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED),
-                        MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED));
-                markerView.layout(0, 0, markerView.getMeasuredWidth(),
-                        markerView.getMeasuredHeight());
-
-                float viewOffsetX = 0;
-                if ((pos[0] + markerView.getWidth() / 2) >= mViewPortHandler.contentRight()) {
-                    viewOffsetX = mViewPortHandler.contentRight() - pos[0] - markerView.getWidth() / 2 + markerView.getTriangleSize() / 2;
-                } else if (pos[0] - markerView.getWidth() / 2 <= mViewPortHandler.contentLeft()) {
-                    viewOffsetX = mViewPortHandler.contentLeft() - pos[0] + markerView.getWidth() / 2 - markerView.getTriangleSize() / 2;
-                }
-
-                markerView.draw(canvas, pos[0], pos[1], viewOffsetX);
-            }
-        }
-    }
-
-
-    protected void drawFixedMarker(Canvas canvas, FixedMarkerView markerView) {
-
-        Highlight highlight;
-
-        if (mIndicesToHighlight.length > 0) {
-            highlight = mIndicesToHighlight[0];
-        } else {
-            return;
-        }
-
+        Highlight highlight = mIndicesToHighlight[0];
 
         float xIndex = highlight.getX();
 
@@ -1733,22 +1822,6 @@ public abstract class BarLineChartBase<T extends BarLineScatterCandleBubbleData<
                 : ((mData == null ? 0.f : mData.getEntryCount()) - 1.f);
 
         if (!(xIndex <= deltaX && xIndex <= deltaX * mAnimator.getPhaseX())) {
-            return;
-        }
-
-        int dataSetCount = mData.getDataSetCount();
-        String[] labels = new String[dataSetCount];
-        Entry[] entries = new Entry[dataSetCount];
-        Entry temp = null;
-        for (int i = 0; i < dataSetCount; i++) {
-            labels[i] = mData.getDataSetByIndex(i).getLabel();
-            entries[i] = mData.getDataSetByIndex(i).getEntryForIndex((int) highlight.getX());
-            if (entries[i] != null && temp == null) {
-                temp = entries[i];
-            }
-        }
-
-        if (temp == null) {
             return;
         }
 
@@ -1761,28 +1834,37 @@ public abstract class BarLineChartBase<T extends BarLineScatterCandleBubbleData<
         }
 
 
-        int dataSetIndex = highlight.getDataSetIndex();
-        markerView.refreshContent(mData.getDataSetLabels()[dataSetIndex], labels, entries, highlight,mData.getDataSets().get(dataSetIndex).getValueFormatter());
-
-        markerView.measure(MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED),
-                MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED));
-        markerView.layout(0, 0, markerView.getMeasuredWidth(),
-                markerView.getMeasuredHeight());
-
-        if (pos[0] >= mViewPortHandler.getContentCenter().x) {
-            pos[0] = mViewPortHandler.contentLeft();
+        markerView.prepare(highlight);
+        if (markerView.getType().equals(ChartMarkerView.RECTANGLE)) {
+            final float offset = Utils.convertDpToPixel(2);
+            if (pos[0] >= mViewPortHandler.getContentCenter().x) {
+                pos[0] = mViewPortHandler.contentLeft();
+            } else {
+                pos[0] = mViewPortHandler.contentRight() - markerView.getWidth() - offset;
+            }
+            pos[1] = mViewPortHandler.contentTop() - offset;
         } else {
-            pos[0] = mViewPortHandler.contentRight() - markerView.getWidth() - 2;
+
+
+            if (pos[1] - markerView.getHeight() <= mViewPortHandler.contentTop()) {
+                markerView.setArrowPostion(ArrowShadowBitmap.TOP);
+            } else {
+                markerView.setArrowPostion(ArrowShadowBitmap.BOTTOM);
+            }
+
+            float viewOffsetX = 0;
+            RectF rect = markerView.getContectRect();
+            float halfWidth = rect.width() / 2;
+            if ((pos[0] + halfWidth) >= mViewPortHandler.contentRight()) {
+                viewOffsetX = mViewPortHandler.contentRight() - pos[0] - halfWidth + markerView.getTriangleSize() / 2;
+            } else if (pos[0] - halfWidth <= mViewPortHandler.contentLeft()) {
+                viewOffsetX = mViewPortHandler.contentLeft() - pos[0] + halfWidth - markerView.getTriangleSize() / 2;
+            }
+
+            markerView.setViewOffset(viewOffsetX);
+
+
         }
-
-        pos[1] = mViewPortHandler.contentTop() - 2;
-
-//        float viewOffsetX = 0;
-//                if ((pos[0] + markerView.getWidth() / 2) >= mViewPortHandler.contentRight()) {
-//                    viewOffsetX = mViewPortHandler.contentRight() - pos[0] - markerView.getWidth() / 2 + markerView.getTriangleSize() / 2;
-//                } else if (pos[0] - markerView.getWidth() / 2 <= mViewPortHandler.contentLeft()) {
-//                    viewOffsetX = mViewPortHandler.contentLeft() - pos[0] + markerView.getWidth() / 2 - markerView.getTriangleSize() / 2;
-//                }
 
         markerView.draw(canvas, pos[0], pos[1]);
     }
@@ -1820,5 +1902,14 @@ public abstract class BarLineChartBase<T extends BarLineScatterCandleBubbleData<
                 v.requestDisallowInterceptTouchEvent(true);
             }
         }
+    }
+
+    @Override
+    public boolean isHighlightAllEnabled() {
+        return highlightAllEnabled;
+    }
+
+    public void setHighlightAllEnabled(boolean highlightAllEnabled) {
+        this.highlightAllEnabled = highlightAllEnabled;
     }
 }

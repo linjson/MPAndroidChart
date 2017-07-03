@@ -43,6 +43,7 @@ public class CombinedChart extends BarLineChartBase<CombinedData> implements Com
     private boolean mDrawBarShadow = false;
 
     protected DrawOrder[] mDrawOrder;
+    private boolean mHighlightAllBarEnabled;
 
     /**
      * enum that allows to specify the order in which the different data objects
@@ -90,7 +91,7 @@ public class CombinedChart extends BarLineChartBase<CombinedData> implements Com
     public void setData(CombinedData data) {
         super.setData(data);
         setHighlighter(new CombinedHighlighter(this, this));
-        ((CombinedChartRenderer)mRenderer).createRenderers();
+        ((CombinedChartRenderer) mRenderer).createRenderers();
         mRenderer.initBuffers();
     }
 
@@ -114,9 +115,12 @@ public class CombinedChart extends BarLineChartBase<CombinedData> implements Com
             if (h == null || !isHighlightFullBarEnabled()) return h;
 
             // For isHighlightFullBarEnabled, remove stackIndex
-            return new Highlight(h.getX(), h.getY(),
+            Highlight other = new Highlight(h.getX(), h.getY(),
                     h.getXPx(), h.getYPx(),
                     h.getDataSetIndex(), -1, h.getAxis());
+
+            other.setDataIndex(h.getDataIndex());
+            return other;
         }
     }
 
@@ -202,6 +206,15 @@ public class CombinedChart extends BarLineChartBase<CombinedData> implements Com
     @Override
     public boolean isHighlightFullBarEnabled() {
         return mHighlightFullBarEnabled;
+    }
+
+    @Override
+    public boolean isHighlightAllBarEnabled() {
+        return mHighlightAllBarEnabled;
+    }
+
+    public void setHighlightAllBarEnabled(boolean highlightAllBarEnabled) {
+        mHighlightAllBarEnabled = highlightAllBarEnabled;
     }
 
     /**

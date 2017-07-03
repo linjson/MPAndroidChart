@@ -8,6 +8,8 @@ import android.graphics.Path;
 import android.graphics.drawable.Drawable;
 
 import com.github.mikephil.charting.animation.ChartAnimator;
+import com.github.mikephil.charting.charts.BarLineChartBase;
+import com.github.mikephil.charting.charts.CombinedChart;
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
@@ -22,11 +24,13 @@ import com.github.mikephil.charting.utils.Transformer;
 import com.github.mikephil.charting.utils.ViewPortHandler;
 
 import java.lang.ref.WeakReference;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
 public class LineChartRenderer extends LineRadarRenderer {
 
+    private final Paint mSelectPaint;
     protected LineDataProvider mChart;
 
     /**
@@ -58,10 +62,13 @@ public class LineChartRenderer extends LineRadarRenderer {
                              ViewPortHandler viewPortHandler) {
         super(animator, viewPortHandler);
         mChart = chart;
-
         mCirclePaintInner = new Paint(Paint.ANTI_ALIAS_FLAG);
         mCirclePaintInner.setStyle(Paint.Style.FILL);
         mCirclePaintInner.setColor(Color.WHITE);
+
+        mSelectPaint = new Paint(mCirclePaintInner);
+
+        mRenderPaint.setStrokeCap(Paint.Cap.ROUND);
     }
 
     @Override
@@ -571,6 +578,7 @@ public class LineChartRenderer extends LineRadarRenderer {
     @Override
     public void drawExtras(Canvas c) {
         drawCircles(c);
+        drawHighlightCircles(c);
     }
 
     /**
@@ -633,7 +641,11 @@ public class LineChartRenderer extends LineRadarRenderer {
             }
 
             int boundsRangeCount = mXBounds.range + mXBounds.min;
-
+            int[] selected = dataSet.getSelectXIndexes();
+            int selectCircleColor = dataSet.getSelectCircleColor();
+            float selectCircleRadius = dataSet.getSelectCircleRadius();
+            boolean drawSelectedData = selected != null && selected.length != 0 && selectCircleColor != 0 && selectCircleRadius != 0;
+            mSelectPaint.setColor(selectCircleColor);
             for (int j = mXBounds.min; j <= boundsRangeCount; j++) {
 
                 Entry e = dataSet.getEntryForIndex(j);
@@ -655,7 +667,12 @@ public class LineChartRenderer extends LineRadarRenderer {
                 Bitmap circleBitmap = imageCache.getBitmap(j);
 
                 if (circleBitmap != null) {
-                    c.drawBitmap(circleBitmap, mCirclesBuffer[0] - circleRadius, mCirclesBuffer[1] - circleRadius, mRenderPaint);
+                    int ix = drawSelectedData ? Arrays.binarySearch(selected, (int) e.getX()) : -1;
+                    if (ix >= 0) {
+                        c.drawCircle(mCirclesBuffer[0], mCirclesBuffer[1], selectCircleRadius, mSelectPaint);
+                    } else {
+                        c.drawBitmap(circleBitmap, mCirclesBuffer[0] - circleRadius, mCirclesBuffer[1] - circleRadius, mRenderPaint);
+                    }
                 }
             }
         }
@@ -665,15 +682,42 @@ public class LineChartRenderer extends LineRadarRenderer {
     public void drawHighlighted(Canvas c, Highlight[] indices) {
 
         LineData lineData = mChart.getLineData();
+        mHighlightPaint.setStyle(Paint.Style.STROKE);
+
+        boolean highlightAllEnabled = mChart.isHighlightAllEnabled();
 
         for (Highlight high : indices) {
-
             ILineDataSet set = lineData.getDataSetByIndex(high.getDataSetIndex());
 
-            if (set == null || !set.isHighlightEnabled())
+            if (set == null)
                 continue;
 
             Entry e = set.getEntryForXValue(high.getX(), high.getY());
+
+            if (highlightAllEnabled) {
+                MPPointD pix = mChart.getTransformer(set.getAxisDependency()).getPixelForValues(e.getX(), e.getY() * mAnimator
+                        .getPhaseY());
+
+
+                if (mChart instanceof CombinedChart) {
+                    int dataIndex = ((CombinedChart) mChart).getData().getAllData().indexOf(lineData);
+                    if (high.getDataIndex() == dataIndex) {
+                        high.setDraw((float) pix.x, (float) pix.y);
+                    }
+
+                } else {
+                    high.setDraw((float) pix.x, (float) pix.y);
+                }
+
+
+                drawAllHighlight(c, lineData, set, e);
+                return;
+            }
+
+
+            if (!set.isHighlightEnabled()) {
+                continue;
+            }
 
             if (!isInBoundsX(e, set))
                 continue;
@@ -685,7 +729,122 @@ public class LineChartRenderer extends LineRadarRenderer {
 
             // draw the lines
             drawHighlightLines(c, (float) pix.x, (float) pix.y, set);
+
         }
+    }
+
+    private void drawAllHighlight(Canvas c, LineData lineData, ILineDataSet set, Entry entry) {
+        int x = set.getEntryIndex(entry);
+
+        int size = lineData.getDataSetCount();
+
+        for (int i = 0; i < size; i++) {
+            ILineDataSet dataSet = lineData.getDataSetByIndex(i);
+            Entry e = dataSet.getEntryForIndex(x);
+
+            if (!set.isHighlightEnabled()) {
+                return;
+            }
+
+            if (!isInBoundsX(e, set))
+                continue;
+
+            MPPointD pix = mChart.getTransformer(set.getAxisDependency()).getPixelForValues(e.getX(), e.getY() * mAnimator
+                    .getPhaseY());
+
+            // draw the lines
+            drawHighlightLines(c, (float) pix.x, (float) pix.y, set);
+
+
+        }
+    }
+
+    private void drawHighlightCircles(Canvas c) {
+
+        BarLineChartBase chart = (BarLineChartBase) mChart;
+
+
+        if (!chart.valuesToHighlight()) {
+            return;
+        }
+
+        Highlight[] indices = chart.getHighlighted();
+        boolean highlightAllEnabled = mChart.isHighlightAllEnabled();
+        LineData lineData = mChart.getLineData();
+        int dataIndex = -1;
+        if (mChart instanceof CombinedChart) {
+            dataIndex = ((CombinedChart) mChart).getData().getAllData().indexOf(lineData);
+
+        }
+
+        for (Highlight high : indices) {
+
+            ILineDataSet set = lineData.getDataSetByIndex(high.getDataSetIndex());
+
+            if (set == null)
+                continue;
+
+
+            Entry e = set.getEntryForXValue(high.getX(), high.getY());
+
+            if (highlightAllEnabled) {
+
+                drawAllHighlightCircles(c, lineData, set, e, high);
+                return;
+            }
+
+            if (high.getDataIndex() != dataIndex || !set.isHighlightEnabled() || !isInBoundsX(e, set)) {
+                continue;
+            }
+
+            MPPointD pix = mChart.getTransformer(set.getAxisDependency()).getPixelForValues(e.getX(), e.getY() * mAnimator
+                    .getPhaseY());
+
+            drawHighlightCircle(c, set, pix);
+
+        }
+
+
+    }
+
+    private void drawHighlightCircle(Canvas c, ILineDataSet set, MPPointD pix) {
+        mHighlightPaint.setColor(set.getHighlightCircleColor());
+        mHighlightPaint.setStyle(Paint.Style.FILL);
+        c.drawCircle((float) pix.x, (float) pix.y, set.getHighlightCircleRadius(), mHighlightPaint);
+
+        mHighlightPaint.setColor(set.getHighlightTransparentCircleColor());
+
+        c.drawCircle((float) pix.x, (float) pix.y, set.getHighlightTransparentCircleRadius(), mHighlightPaint);
+    }
+
+    private void drawAllHighlightCircles(Canvas c, LineData lineData, ILineDataSet set, Entry entry, Highlight high) {
+
+
+        int x = set.getEntryIndex(entry);
+
+        int size = lineData.getDataSetCount();
+
+        for (int i = 0; i < size; i++) {
+            ILineDataSet dataSet = lineData.getDataSetByIndex(i);
+            Entry e = dataSet.getEntryForIndex(x);
+
+            if (!set.isHighlightEnabled()) {
+                return;
+            }
+
+            if (!isInBoundsX(e, set))
+                continue;
+
+            MPPointD pix = mChart.getTransformer(set.getAxisDependency()).getPixelForValues(e.getX(), e.getY() * mAnimator
+                    .getPhaseY());
+
+            // draw the lines
+            drawHighlightCircle(c, set, pix);
+
+
+        }
+
+
     }
 
     /**
@@ -822,4 +981,6 @@ public class LineChartRenderer extends LineRadarRenderer {
             return circleBitmaps[index % circleBitmaps.length];
         }
     }
+
+
 }

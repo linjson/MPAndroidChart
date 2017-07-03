@@ -758,4 +758,37 @@ public abstract class Utils {
     public static int getSDKInt() {
         return Build.VERSION.SDK_INT;
     }
+
+    public static void drawXAxisValue(Canvas c, String text, float x, float y,
+                                      Paint paint,
+                                      MPPointF anchor) {
+
+        float drawOffsetX = 0.f;
+        float drawOffsetY = 0.f;
+
+        final float lineHeight = paint.getFontMetrics(mFontMetricsBuffer);
+        paint.getTextBounds(text, 0, text.length(), mDrawTextRectBuffer);
+
+        // Android sometimes has pre-padding
+        drawOffsetX -= mDrawTextRectBuffer.left;
+
+        // Android does not snap the bounds to line boundaries,
+        //  and draws from bottom to top.
+        // And we want to normalize it.
+        drawOffsetY += -mFontMetricsBuffer.ascent;
+
+        // To have a consistent point of reference, we always draw left-aligned
+
+        if (anchor.x != 0.f || anchor.y != 0.f) {
+
+            drawOffsetX -= mDrawTextRectBuffer.width() * anchor.x;
+            drawOffsetY -= lineHeight * anchor.y;
+        }
+
+        drawOffsetX += x;
+        drawOffsetY += y;
+
+        c.drawText(text, drawOffsetX, drawOffsetY, paint);
+
+    }
 }

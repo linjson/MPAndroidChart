@@ -3,6 +3,7 @@ package com.github.mikephil.charting.components;
 import android.graphics.Color;
 import android.graphics.Paint;
 
+import com.github.mikephil.charting.utils.FSize;
 import com.github.mikephil.charting.utils.Utils;
 
 /**
@@ -99,6 +100,7 @@ public class YAxis extends AxisBase {
         // default left
         this.mAxisDependency = AxisDependency.LEFT;
         this.mYOffset = 0f;
+        mTitlePosition = Y_TITLEPOSITION_BOTTOM;
     }
 
     public YAxis(AxisDependency position) {
@@ -326,7 +328,7 @@ public class YAxis extends AxisBase {
 
         p.setTextSize(mTextSize);
 
-        return Utils.getLineHeight(p)+getYOffset() * 2f;
+        return Utils.getLineHeight(p) + getYOffset() * 2f;
 //        String label = getLongestLabel();
 //
 //        return (float) Utils.calcTextHeight(p, label) + getYOffset() * 2f;
@@ -343,6 +345,10 @@ public class YAxis extends AxisBase {
             return true;
         else
             return false;
+    }
+
+    public boolean needsDraw() {
+        return isEnabled() && isDrawLabelsEnabled();
     }
 
     @Override
@@ -377,5 +383,12 @@ public class YAxis extends AxisBase {
 
         // calc actual range
         this.mAxisRange = Math.abs(this.mAxisMaximum - this.mAxisMinimum);
+    }
+
+    @Override
+    public FSize getTitleSize(Paint p) {
+        FSize size = super.getTitleSize(p);
+        size.width += mXOffset;
+        return size;
     }
 }

@@ -100,4 +100,18 @@ public interface ILineDataSet extends ILineRadarDataSet<Entry> {
      * @return
      */
     IFillFormatter getFillFormatter();
+
+    int[] getSelectXIndexes();
+
+    float getSelectCircleRadius();
+
+    int getSelectCircleColor();
+
+    int getHighlightCircleColor();
+
+    float getHighlightCircleRadius();
+
+    int getHighlightTransparentCircleColor();
+
+    float getHighlightTransparentCircleRadius();
 }

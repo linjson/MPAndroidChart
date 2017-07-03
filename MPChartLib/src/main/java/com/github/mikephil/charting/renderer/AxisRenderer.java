@@ -49,6 +49,8 @@ public abstract class AxisRenderer extends Renderer {
      */
     protected Paint mLimitLinePaint;
 
+    protected Paint mTitlePaint;
+
     public AxisRenderer(ViewPortHandler viewPortHandler, Transformer trans, AxisBase axis) {
         super(viewPortHandler);
 
@@ -72,6 +74,8 @@ public abstract class AxisRenderer extends Renderer {
 
             mLimitLinePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
             mLimitLinePaint.setStyle(Style.STROKE);
+
+            mTitlePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         }
     }
 
@@ -291,4 +295,8 @@ public abstract class AxisRenderer extends Renderer {
      * @param c
      */
     public abstract void renderLimitLines(Canvas c);
+
+    public Paint getTitlePaint() {
+        return mTitlePaint;
+    }
 }

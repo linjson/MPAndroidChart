@@ -37,6 +37,7 @@ public class BarChart extends BarLineChartBase<BarData> implements BarDataProvid
     private boolean mDrawBarShadow = false;
 
     private boolean mFitBars = false;
+    private boolean mHighlightAllBarEnabled;
 
     public BarChart(Context context) {
         super(context);
@@ -206,6 +207,15 @@ public class BarChart extends BarLineChartBase<BarData> implements BarDataProvid
     @Override
     public boolean isHighlightFullBarEnabled() {
         return mHighlightFullBarEnabled;
+    }
+
+    @Override
+    public boolean isHighlightAllBarEnabled() {
+        return mHighlightAllBarEnabled;
+    }
+
+    public void setHighlightAllBarEnabled(boolean highlightAllBarEnabled) {
+        mHighlightAllBarEnabled = highlightAllBarEnabled;
     }
 
     /**

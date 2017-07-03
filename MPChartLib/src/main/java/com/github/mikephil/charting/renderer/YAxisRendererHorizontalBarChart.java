@@ -7,6 +7,7 @@ import android.graphics.Paint.Align;
 import android.graphics.Path;
 import android.graphics.RectF;
 
+import com.github.mikephil.charting.components.AxisBase;
 import com.github.mikephil.charting.components.LimitLine;
 import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.components.YAxis.AxisDependency;
@@ -78,30 +79,55 @@ public class YAxisRendererHorizontalBarChart extends YAxisRenderer {
 
         float baseYOffset = Utils.convertDpToPixel(2.5f);
         float textHeight = Utils.calcTextHeight(mAxisLabelPaint, "Q");
+        float titleHeight = Utils.calcTextHeight(mTitlePaint, "Q");
 
         AxisDependency dependency = mYAxis.getAxisDependency();
         YAxisLabelPosition labelPosition = mYAxis.getLabelPosition();
 
         float yPos = 0f;
-
+        float yTitlePos = 0f;
         if (dependency == AxisDependency.LEFT) {
 
             if (labelPosition == YAxisLabelPosition.OUTSIDE_CHART) {
                 yPos = mViewPortHandler.contentTop() - baseYOffset;
+                yTitlePos = yPos;
             } else {
-                yPos = mViewPortHandler.contentTop() - baseYOffset;
+                yPos = mViewPortHandler.contentTop() + baseYOffset + textHeight;
+                yTitlePos = mViewPortHandler.contentTop() + baseYOffset + titleHeight;
             }
-
         } else {
 
             if (labelPosition == YAxisLabelPosition.OUTSIDE_CHART) {
                 yPos = mViewPortHandler.contentBottom() + textHeight + baseYOffset;
+                yTitlePos = mViewPortHandler.contentBottom() + titleHeight;
             } else {
-                yPos = mViewPortHandler.contentBottom() + textHeight + baseYOffset;
+                yPos = mViewPortHandler.contentBottom() - baseYOffset;
+                yTitlePos = yPos;
             }
         }
 
         drawYLabels(c, yPos, positions, mYAxis.getYOffset());
+        drawTitle(c, yTitlePos, positions, mYAxis.getYTitleOffset());
+    }
+
+
+    protected void drawTitle(Canvas c, float yPos, float[] positions, float offset) {
+
+        if (!mAxis.drawTitleEnabled()) {
+            return;
+        }
+
+        final String title = mAxis.getTitle();
+        final int pos = mAxis.getTitlePosition();
+        mTitlePaint.setColor(mAxis.getTitleColor());
+        float y = yPos + mAxis.getYTitleOffset();
+        if (pos == AxisBase.Y_TITLEPOSITION_BOTTOM) {
+            mTitlePaint.setTextAlign(Align.RIGHT);
+            c.drawText(title, mViewPortHandler.contentLeft() + mAxis.getXTitleOffset(), y, mTitlePaint);
+        } else if (pos == AxisBase.Y_TITLEPOSITION_TOP) {
+            c.drawText(title, mViewPortHandler.contentRight() + mAxis.getXTitleOffset(), y, mTitlePaint);
+        }
+
     }
 
     @Override
@@ -151,7 +177,7 @@ public class YAxisRendererHorizontalBarChart extends YAxisRenderer {
     @Override
     protected float[] getTransformedPositions() {
 
-        if(mGetTransformedPositionsBuffer.length != mYAxis.mEntryCount * 2) {
+        if (mGetTransformedPositionsBuffer.length != mYAxis.mEntryCount * 2) {
             mGetTransformedPositionsBuffer = new float[mYAxis.mEntryCount * 2];
         }
         float[] positions = mGetTransformedPositionsBuffer;
@@ -211,6 +237,7 @@ public class YAxisRendererHorizontalBarChart extends YAxisRenderer {
 
     protected Path mRenderLimitLinesPathBuffer = new Path();
     protected float[] mRenderLimitLinesBuffer = new float[4];
+
     /**
      * Draws the LimitLines associated with this axis to the screen.
      * This is the standard XAxis renderer using the YAxis limit lines.

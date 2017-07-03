@@ -11,16 +11,16 @@ public class MinutesHK implements MinutesType {
     public SparseArray<String> getShowTimeLabels() {
         SparseArray<String> times = new SparseArray<>();
         times.put(0, "09:30");
-        times.put(30, "10:00");
-        times.put(60, "10:30");
-        times.put(90, "11:00");
-        times.put(120, "11:30");
+//        times.put(30, "10:00");
+//        times.put(60, "10:30");
+//        times.put(90, "11:00");
+//        times.put(120, "11:30");
         times.put(151, "12:00/13:00");
-        times.put(182, "13:30");
-        times.put(212, "14:00");
-        times.put(242, "14:30");
-        times.put(272, "15:00");
-        times.put(302, "15:30");
+//        times.put(182, "13:30");
+//        times.put(212, "14:00");
+//        times.put(242, "14:30");
+//        times.put(272, "15:00");
+//        times.put(302, "15:30");
         times.put(332, "16:00");
         return times;
     }

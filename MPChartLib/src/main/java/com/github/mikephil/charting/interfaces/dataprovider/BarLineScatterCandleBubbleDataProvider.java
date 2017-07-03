@@ -13,4 +13,6 @@ public interface BarLineScatterCandleBubbleDataProvider extends ChartInterface {
     float getHighestVisibleX();
 
     BarLineScatterCandleBubbleData getData();
+
+    boolean isHighlightAllEnabled();
 }
