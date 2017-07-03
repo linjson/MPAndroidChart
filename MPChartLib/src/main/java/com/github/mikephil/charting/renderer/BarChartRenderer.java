@@ -5,6 +5,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.RectF;
+import android.graphics.drawable.Drawable;
 
 import com.github.mikephil.charting.animation.ChartAnimator;
 import com.github.mikephil.charting.buffer.BarBuffer;
@@ -15,6 +16,7 @@ import com.github.mikephil.charting.highlight.Highlight;
 import com.github.mikephil.charting.highlight.Range;
 import com.github.mikephil.charting.interfaces.dataprovider.BarDataProvider;
 import com.github.mikephil.charting.interfaces.datasets.IBarDataSet;
+import com.github.mikephil.charting.utils.MPPointF;
 import com.github.mikephil.charting.utils.Transformer;
 import com.github.mikephil.charting.utils.Utils;
 import com.github.mikephil.charting.utils.ViewPortHandler;
@@ -276,6 +278,10 @@ public class BarChartRenderer extends BarLineScatterCandleBubbleRenderer {
 
                 final float phaseY = mAnimator.getPhaseY();
 
+                MPPointF iconsOffset = MPPointF.getInstance(dataSet.getIconsOffset());
+                iconsOffset.x = Utils.convertDpToPixel(iconsOffset.x);
+                iconsOffset.y = Utils.convertDpToPixel(iconsOffset.y);
+
                 // if only single values are drawn (sum)
                 if (!dataSet.isStacked()) {
 
@@ -300,9 +306,31 @@ public class BarChartRenderer extends BarLineScatterCandleBubbleRenderer {
                                 || !mViewPortHandler.isInBoundsLeft(x))
                             continue;
 
-                        drawValue(c, dataSet.getValueFormatter(), val, entry, i, x,
-                                y,
-                                dataSet.getValueTextColor(j / 4));
+                        if (dataSet.isDrawValuesEnabled()) {
+                            drawValue(c, dataSet.getValueFormatter(), val, entry, i, x,
+                                    y,
+                                    dataSet.getValueTextColor(j / 4));
+                        }
+
+                        if (entry.getIcon() != null && dataSet.isDrawIconsEnabled()) {
+
+                            Drawable icon = entry.getIcon();
+
+                            float px = x;
+                            float py = y;
+
+                            px += iconsOffset.x;
+                            py += iconsOffset.y;
+
+                            Utils.drawImage(
+                                    c,
+                                    icon,
+                                    (int)px,
+                                    (int)py,
+                                    icon.getIntrinsicWidth(),
+                                    icon.getIntrinsicHeight());
+                        }
+
                     }
 
                     // if we have stacks
@@ -334,9 +362,32 @@ public class BarChartRenderer extends BarLineScatterCandleBubbleRenderer {
                                     || !mViewPortHandler.isInBoundsLeft(x))
                                 continue;
 
-                            drawValue(c, dataSet.getValueFormatter(), entry.getY(), entry, i, x,
-                                    buffer.buffer[bufferIndex + 1] + (entry.getY() >= 0 ? posOffset : negOffset),
-                                    color);
+                            if (dataSet.isDrawValuesEnabled()) {
+                                drawValue(c, dataSet.getValueFormatter(), entry.getY(), entry, i, x,
+                                        buffer.buffer[bufferIndex + 1] +
+                                                (entry.getY() >= 0 ? posOffset : negOffset),
+                                        color);
+                            }
+
+                            if (entry.getIcon() != null && dataSet.isDrawIconsEnabled()) {
+
+                                Drawable icon = entry.getIcon();
+
+                                float px = x;
+                                float py = buffer.buffer[bufferIndex + 1] +
+                                        (entry.getY() >= 0 ? posOffset : negOffset);
+
+                                px += iconsOffset.x;
+                                py += iconsOffset.y;
+
+                                Utils.drawImage(
+                                        c,
+                                        icon,
+                                        (int)px,
+                                        (int)py,
+                                        icon.getIntrinsicWidth(),
+                                        icon.getIntrinsicHeight());
+                            }
 
                             // draw stack values
                         } else {
@@ -434,11 +485,22 @@ public class BarChartRenderer extends BarLineScatterCandleBubbleRenderer {
                                         || !mViewPortHandler.isInBoundsLeft(x)) {
                                     continue;
                                 }
+                                if (dataSet.isDrawValuesEnabled()) {
+                                    drawValue(c, dataSet.getValueFormatter(), vals[idx], entry, i, x, y, color);
+                                }
 
+                                if (entry.getIcon() != null && dataSet.isDrawIconsEnabled()) {
 
-                                drawValue(c, dataSet.getValueFormatter(), vals[idx], entry, i, x, y, color);
+                                    Drawable icon = entry.getIcon();
 
-
+                                    Utils.drawImage(
+                                            c,
+                                            icon,
+                                            (int)(x + iconsOffset.x),
+                                            (int)(y + iconsOffset.y),
+                                            icon.getIntrinsicWidth(),
+                                            icon.getIntrinsicHeight());
+                                }
                             }
 
 
@@ -486,6 +548,8 @@ public class BarChartRenderer extends BarLineScatterCandleBubbleRenderer {
                         index++;
                     }
                 }
+
+                MPPointF.recycleInstance(iconsOffset);
             }
         }
     }

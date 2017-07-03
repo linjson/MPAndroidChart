@@ -4,6 +4,7 @@ package com.github.mikephil.charting.renderer;
 import android.graphics.Canvas;
 import android.graphics.Paint.Align;
 import android.graphics.RectF;
+import android.graphics.drawable.Drawable;
 
 import com.github.mikephil.charting.animation.ChartAnimator;
 import com.github.mikephil.charting.buffer.BarBuffer;
@@ -15,6 +16,7 @@ import com.github.mikephil.charting.highlight.Highlight;
 import com.github.mikephil.charting.interfaces.dataprovider.BarDataProvider;
 import com.github.mikephil.charting.interfaces.dataprovider.ChartInterface;
 import com.github.mikephil.charting.interfaces.datasets.IBarDataSet;
+import com.github.mikephil.charting.utils.MPPointF;
 import com.github.mikephil.charting.utils.Transformer;
 import com.github.mikephil.charting.utils.Utils;
 import com.github.mikephil.charting.utils.ViewPortHandler;
@@ -219,6 +221,10 @@ public class HorizontalBarChartRenderer extends BarChartRenderer {
 
                 final float phaseY = mAnimator.getPhaseY();
 
+                MPPointF iconsOffset = MPPointF.getInstance(dataSet.getIconsOffset());
+                iconsOffset.x = Utils.convertDpToPixel(iconsOffset.x);
+                iconsOffset.y = Utils.convertDpToPixel(iconsOffset.y);
+
                 // if only single values are drawn (sum)
                 if (!dataSet.isStacked()) {
 
@@ -230,9 +236,9 @@ public class HorizontalBarChartRenderer extends BarChartRenderer {
                             y = buffer.buffer[j + 3] + valueTextHeight;
                         }
 
-                        BarEntry e = dataSet.getEntryForIndex(j / 4);
-                        float val = e.getY();
-                        String formattedValue = formatter.getFormattedValue(val, e, i, mViewPortHandler);
+                        BarEntry entry = dataSet.getEntryForIndex(j / 4);
+                        float val = entry.getY();
+                        String formattedValue = formatter.getFormattedValue(val, entry, i, mViewPortHandler);
 
                         // calculate the correct offset depending on the draw position of the value
                         float valueTextWidth = Utils.calcTextWidth(mValuePaint, formattedValue);
@@ -263,8 +269,30 @@ public class HorizontalBarChartRenderer extends BarChartRenderer {
                         if (!mViewPortHandler.isInBoundsBottom(y))
                             continue;
 
-                        drawValue(c, formattedValue, x,
-                                y + halfTextHeight, dataSet.getValueTextColor(j / 2));
+                        if (dataSet.isDrawValuesEnabled()) {
+                            drawValue(c, formattedValue, x,
+                                    y + halfTextHeight, dataSet.getValueTextColor(j / 2));
+                        }
+
+                        if (entry.getIcon() != null && dataSet.isDrawIconsEnabled()) {
+
+                            Drawable icon = entry.getIcon();
+
+                            float px = x;
+                            float py = y;
+
+                            px += iconsOffset.x;
+                            py += iconsOffset.y;
+
+                            Utils.drawImage(
+                                    c,
+                                    icon,
+                                    (int) px,
+                                    (int) py,
+                                    icon.getIntrinsicWidth(),
+                                    icon.getIntrinsicHeight());
+                        }
+
                     }
 
                     // if each value of a potential stack should be drawn
@@ -277,10 +305,10 @@ public class HorizontalBarChartRenderer extends BarChartRenderer {
 
                     while (index < dataSet.getEntryCount() * mAnimator.getPhaseX()) {
 
-                        BarEntry e = dataSet.getEntryForIndex(index);
+                        BarEntry entry = dataSet.getEntryForIndex(index);
 
                         int color = dataSet.getValueTextColor(index);
-                        float[] vals = e.getYVals();
+                        float[] vals = entry.getYVals();
 
                         // we still draw stacked bars, but there is one
                         // non-stacked
@@ -296,8 +324,9 @@ public class HorizontalBarChartRenderer extends BarChartRenderer {
                             if (!mViewPortHandler.isInBoundsBottom(buffer.buffer[bufferIndex + 1]))
                                 continue;
 
-                            float val = e.getY();
-                            String formattedValue = formatter.getFormattedValue(val, e, i, mViewPortHandler);
+                            float val = entry.getY();
+                            String formattedValue = formatter.getFormattedValue(val,
+                                    entry, i, mViewPortHandler);
 
                             // calculate the correct offset depending on the draw position of the value
                             float valueTextWidth = Utils.calcTextWidth(mValuePaint, formattedValue);
@@ -309,9 +338,32 @@ public class HorizontalBarChartRenderer extends BarChartRenderer {
                                 negOffset = -negOffset - valueTextWidth;
                             }
 
-                            drawValue(c, formattedValue, buffer.buffer[bufferIndex + 2]
-                                            + (e.getY() >= 0 ? posOffset : negOffset),
-                                    buffer.buffer[bufferIndex + 1] + halfTextHeight, color);
+                            if (dataSet.isDrawValuesEnabled()) {
+                                drawValue(c, formattedValue,
+                                        buffer.buffer[bufferIndex + 2]
+                                                + (entry.getY() >= 0 ? posOffset : negOffset),
+                                        buffer.buffer[bufferIndex + 1] + halfTextHeight, color);
+                            }
+
+                            if (entry.getIcon() != null && dataSet.isDrawIconsEnabled()) {
+
+                                Drawable icon = entry.getIcon();
+
+                                float px = buffer.buffer[bufferIndex + 2]
+                                        + (entry.getY() >= 0 ? posOffset : negOffset);
+                                float py = buffer.buffer[bufferIndex + 1];
+
+                                px += iconsOffset.x;
+                                py += iconsOffset.y;
+
+                                Utils.drawImage(
+                                        c,
+                                        icon,
+                                        (int) px,
+                                        (int) py,
+                                        icon.getIntrinsicWidth(),
+                                        icon.getIntrinsicHeight());
+                            }
 
                         } else {
 
@@ -328,7 +380,7 @@ public class HorizontalBarChartRenderer extends BarChartRenderer {
                             float[] posTransformed = new float[posCount * 2];
                             float[] negTransformed = new float[negCount * 2];
                             float posY = 0f;
-                            float negY = -e.getNegativeSum();
+                            float negY = -entry.getNegativeSum();
                             int[] stackColors = dataSet.getStackColors();
                             boolean hasStackColor = stackColors != null && stackColors.length != 0;
 
@@ -365,7 +417,8 @@ public class HorizontalBarChartRenderer extends BarChartRenderer {
                                 float x;
                                 boolean pos = val >= 0;
                                 float[] values = null;
-                                String formattedValue = formatter.getFormattedValue(val, e, i, mViewPortHandler);
+                                String formattedValue = formatter.getFormattedValue(val, entry, i, mViewPortHandler);
+                                // calculate the correct offset depending on the draw position of the value
                                 float valueTextWidth = Utils.calcTextWidth(mValuePaint, formattedValue);
                                 posOffset = (drawValueAboveBar ? valueOffsetPlus : -(valueTextWidth + valueOffsetPlus));
                                 negOffset = (drawValueAboveBar ? -(valueTextWidth + valueOffsetPlus) : valueOffsetPlus);
@@ -446,9 +499,22 @@ public class HorizontalBarChartRenderer extends BarChartRenderer {
 
                                 if (!mViewPortHandler.isInBoundsBottom(y))
                                     continue;
+                                if (dataSet.isDrawValuesEnabled()) {
+                                    drawValue(c, formattedValue, x, y + halfTextHeight, color);
+                                }
 
-                                drawValue(c, formattedValue, x, y + halfTextHeight, color);
+                                if (entry.getIcon() != null && dataSet.isDrawIconsEnabled()) {
 
+                                    Drawable icon = entry.getIcon();
+
+                                    Utils.drawImage(
+                                            c,
+                                            icon,
+                                            (int) (x + iconsOffset.x),
+                                            (int) (y + iconsOffset.y),
+                                            icon.getIntrinsicWidth(),
+                                            icon.getIntrinsicHeight());
+                                }
                             }
 
 //                            float[] transformed = new float[vals.length * 2];
@@ -510,6 +576,8 @@ public class HorizontalBarChartRenderer extends BarChartRenderer {
                         index++;
                     }
                 }
+
+                MPPointF.recycleInstance(iconsOffset);
             }
         }
     }
