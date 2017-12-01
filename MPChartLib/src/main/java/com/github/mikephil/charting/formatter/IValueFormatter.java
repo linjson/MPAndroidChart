@@ -26,4 +26,6 @@ public interface IValueFormatter
      * @return the formatted label ready for being drawn
      */
     String getFormattedValue(float value, Entry entry, int dataSetIndex, ViewPortHandler viewPortHandler);
+
+    String getFormattedValue(float value, Entry entry, int dataSetIndex,int stackIndex, ViewPortHandler viewPortHandler);
 }

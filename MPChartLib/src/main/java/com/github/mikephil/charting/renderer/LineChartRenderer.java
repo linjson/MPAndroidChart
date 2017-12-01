@@ -586,8 +586,8 @@ public class LineChartRenderer extends LineRadarRenderer {
                         Utils.drawImage(
                                 c,
                                 icon,
-                                (int)(x + iconsOffset.x),
-                                (int)(y + iconsOffset.y),
+                                (int) (x + iconsOffset.x),
+                                (int) (y + iconsOffset.y),
                                 icon.getIntrinsicWidth(),
                                 icon.getIntrinsicHeight());
                     }
@@ -851,18 +851,18 @@ public class LineChartRenderer extends LineRadarRenderer {
             ILineDataSet dataSet = lineData.getDataSetByIndex(i);
             Entry e = dataSet.getEntryForIndex(x);
 
-            if (!set.isHighlightEnabled()) {
+            if (!dataSet.isHighlightEnabled()) {
                 return;
             }
 
-            if (!isInBoundsX(e, set))
+            if (!isInBoundsX(e, dataSet))
                 continue;
 
-            MPPointD pix = mChart.getTransformer(set.getAxisDependency()).getPixelForValues(e.getX(), e.getY() * mAnimator
+            MPPointD pix = mChart.getTransformer(dataSet.getAxisDependency()).getPixelForValues(e.getX(), e.getY() * mAnimator
                     .getPhaseY());
 
             // draw the lines
-            drawHighlightCircle(c, set, pix);
+            drawHighlightCircle(c, dataSet, pix);
 
 
         }

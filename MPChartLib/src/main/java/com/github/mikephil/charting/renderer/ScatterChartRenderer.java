@@ -61,9 +61,9 @@ public class ScatterChartRenderer extends LineScatterCandleRadarRenderer {
             return;
         }
 
-        int max = (int)(Math.min(
-                Math.ceil((float)dataSet.getEntryCount() * mAnimator.getPhaseX()),
-                (float)dataSet.getEntryCount()));
+        int max = (int) (Math.min(
+                Math.ceil((float) dataSet.getEntryCount() * mAnimator.getPhaseX()),
+                (float) dataSet.getEntryCount()));
 
         for (int i = 0; i < max; i++) {
 
@@ -118,7 +118,7 @@ public class ScatterChartRenderer extends LineScatterCandleRadarRenderer {
                 MPPointF iconsOffset = MPPointF.getInstance(dataSet.getIconsOffset());
                 iconsOffset.x = Utils.convertDpToPixel(iconsOffset.x);
                 iconsOffset.y = Utils.convertDpToPixel(iconsOffset.y);
-
+                final int entryCount = dataSet.getEntryCount();
                 for (int j = 0; j < positions.length; j += 2) {
 
                     if (!mViewPortHandler.isInBoundsRight(positions[j]))
@@ -129,7 +129,11 @@ public class ScatterChartRenderer extends LineScatterCandleRadarRenderer {
                             || !mViewPortHandler.isInBoundsY(positions[j + 1])))
                         continue;
 
-                    Entry entry = dataSet.getEntryForIndex(j / 2 + mXBounds.min);
+                    int index = j / 2 + mXBounds.min;
+                    if (index >= entryCount) {
+                        continue;
+                    }
+                    Entry entry = dataSet.getEntryForIndex(index);
 
                     if (dataSet.isDrawValuesEnabled()) {
                         drawValue(c,
@@ -139,7 +143,7 @@ public class ScatterChartRenderer extends LineScatterCandleRadarRenderer {
                                 i,
                                 positions[j],
                                 positions[j + 1] - shapeSize,
-                                dataSet.getValueTextColor(j / 2 + mXBounds.min));
+                                dataSet.getValueTextColor(index));
                     }
 
                     if (entry.getIcon() != null && dataSet.isDrawIconsEnabled()) {
@@ -149,8 +153,8 @@ public class ScatterChartRenderer extends LineScatterCandleRadarRenderer {
                         Utils.drawImage(
                                 c,
                                 icon,
-                                (int)(positions[j] + iconsOffset.x),
-                                (int)(positions[j + 1] + iconsOffset.y),
+                                (int) (positions[j] + iconsOffset.x),
+                                (int) (positions[j + 1] + iconsOffset.y),
                                 icon.getIntrinsicWidth(),
                                 icon.getIntrinsicHeight());
                     }

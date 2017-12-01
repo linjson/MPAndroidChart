@@ -43,6 +43,7 @@ public class BarEntry extends Entry {
      */
     public BarEntry(float x, float y) {
         super(x, y);
+        this.barXindex = x;
     }
 
     /**
@@ -90,10 +91,10 @@ public class BarEntry extends Entry {
      */
     public BarEntry(float x, float[] vals) {
         super(x, calcSum(vals));
-        this.barXindex = x;
         this.mYVals = vals;
         calcPosNegSum();
         calcRanges();
+        this.barXindex = x;
     }
 
     /**
@@ -105,10 +106,10 @@ public class BarEntry extends Entry {
      */
     public BarEntry(float x, float[] vals, Object data) {
         super(x, calcSum(vals), data);
-        this.barXindex = x;
         this.mYVals = vals;
         calcPosNegSum();
         calcRanges();
+        this.barXindex = x;
     }
 
     /**
@@ -120,10 +121,10 @@ public class BarEntry extends Entry {
      */
     public BarEntry(float x, float[] vals, Drawable icon) {
         super(x, calcSum(vals), icon);
-        this.barXindex = x;
         this.mYVals = vals;
         calcPosNegSum();
         calcRanges();
+        this.barXindex = x;
     }
 
     /**
@@ -136,10 +137,10 @@ public class BarEntry extends Entry {
      */
     public BarEntry(float x, float[] vals, Drawable icon, Object data) {
         super(x, calcSum(vals), icon, data);
-        this.barXindex = x;
         this.mYVals = vals;
         calcPosNegSum();
         calcRanges();
+        this.barXindex = x;
     }
 
 

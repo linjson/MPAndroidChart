@@ -125,6 +125,7 @@ public class YAxisRendererHorizontalBarChart extends YAxisRenderer {
             mTitlePaint.setTextAlign(Align.RIGHT);
             c.drawText(title, mViewPortHandler.contentLeft() + mAxis.getXTitleOffset(), y, mTitlePaint);
         } else if (pos == AxisBase.Y_TITLEPOSITION_TOP) {
+            mTitlePaint.setTextAlign(Align.LEFT);
             c.drawText(title, mViewPortHandler.contentRight() + mAxis.getXTitleOffset(), y, mTitlePaint);
         }
 

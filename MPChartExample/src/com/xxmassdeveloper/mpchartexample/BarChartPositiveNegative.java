@@ -169,5 +169,10 @@ public class BarChartPositiveNegative extends DemoBase {
         public String getFormattedValue(float value, Entry entry, int dataSetIndex, ViewPortHandler viewPortHandler) {
             return mFormat.format(value);
         }
+
+        @Override
+        public String getFormattedValue(float value, Entry entry, int dataSetIndex, int stackIndex, ViewPortHandler viewPortHandler) {
+            return null;
+        }
     }
 }

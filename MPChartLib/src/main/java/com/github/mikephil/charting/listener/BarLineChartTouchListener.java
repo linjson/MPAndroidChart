@@ -41,12 +41,12 @@ public class BarLineChartTouchListener extends ChartTouchListener<BarLineChartBa
     /**
      * point where the touch action started
      */
-    private MPPointF mTouchStartPoint = MPPointF.getInstance(0,0);
+    private MPPointF mTouchStartPoint = MPPointF.getInstance(0, 0);
 
     /**
      * center between two pointers (fingers on the display)
      */
-    private MPPointF mTouchPointCenter = MPPointF.getInstance(0,0);
+    private MPPointF mTouchPointCenter = MPPointF.getInstance(0, 0);
 
     private float mSavedXDist = 1f;
     private float mSavedYDist = 1f;
@@ -60,8 +60,8 @@ public class BarLineChartTouchListener extends ChartTouchListener<BarLineChartBa
     private VelocityTracker mVelocityTracker;
 
     private long mDecelerationLastTime = 0;
-    private MPPointF mDecelerationCurrentPoint = MPPointF.getInstance(0,0);
-    private MPPointF mDecelerationVelocity = MPPointF.getInstance(0,0);
+    private MPPointF mDecelerationCurrentPoint = MPPointF.getInstance(0, 0);
+    private MPPointF mDecelerationVelocity = MPPointF.getInstance(0, 0);
 
     /**
      * the distance of movement that will be counted as a drag
@@ -321,6 +321,16 @@ public class BarLineChartTouchListener extends ChartTouchListener<BarLineChartBa
 
         if (l != null)
             l.onChartTranslate(event, dX, dY);
+
+        dispatchViewPortChange();
+    }
+
+    private void dispatchViewPortChange() {
+        BarLineChartBase.ViewPortListener viewPortListener = mChart.getViewPortListener();
+
+        if (viewPortListener != null) {
+            viewPortListener.onViewPortChange(mChart.getViewPortHandler().getScaleX(), mChart.getViewPortHandler().getTransX());
+        }
     }
 
     /**
@@ -370,6 +380,8 @@ public class BarLineChartTouchListener extends ChartTouchListener<BarLineChartBa
 
                         if (l != null)
                             l.onChartScale(event, scaleX, scaleY);
+
+                        dispatchViewPortChange();
                     }
 
                 } else if (mTouchMode == X_ZOOM && mChart.isScaleXEnabled()) {
@@ -391,6 +403,7 @@ public class BarLineChartTouchListener extends ChartTouchListener<BarLineChartBa
 
                         if (l != null)
                             l.onChartScale(event, scaleX, 1f);
+                        dispatchViewPortChange();
                     }
 
                 } else if (mTouchMode == Y_ZOOM && mChart.isScaleYEnabled()) {
@@ -412,6 +425,7 @@ public class BarLineChartTouchListener extends ChartTouchListener<BarLineChartBa
 
                         if (l != null)
                             l.onChartScale(event, 1f, scaleY);
+                        dispatchViewPortChange();
                     }
                 }
 
@@ -557,9 +571,7 @@ public class BarLineChartTouchListener extends ChartTouchListener<BarLineChartBa
 
         OnChartGestureListener l = mChart.getOnChartGestureListener();
 
-        if (l != null) {
-            l.onChartDoubleTapped(e);
-        }
+
 
         // check if double-tap zooming is enabled
         if (mChart.isDoubleTapToZoomEnabled() && mChart.getData().getEntryCount() > 0) {
@@ -574,6 +586,12 @@ public class BarLineChartTouchListener extends ChartTouchListener<BarLineChartBa
 
             MPPointF.recycleInstance(trans);
         }
+
+        if (l != null) {
+            l.onChartDoubleTapped(e);
+        }
+
+        dispatchViewPortChange();
 
         return super.onDoubleTap(e);
     }

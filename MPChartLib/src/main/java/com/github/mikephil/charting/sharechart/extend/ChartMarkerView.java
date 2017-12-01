@@ -63,7 +63,7 @@ public class ChartMarkerView {
     protected boolean mValueEnabled;
     protected int mLabelColor;
     protected int mXAxisLabelColor;
-
+    private boolean enabled;
 
     public ChartMarkerView(Context context, String type) {
         mLabelPaint = new Paint();
@@ -90,7 +90,7 @@ public class ChartMarkerView {
 
     }
 
-    public void prepare(Highlight highlight) {
+    public boolean prepare(Highlight highlight) {
         showData.clear();
         final int setIndex = highlight.getDataSetIndex();
         Entry e = null;
@@ -105,7 +105,7 @@ public class ChartMarkerView {
         }
 
         if (e == null || e.getX() != highlight.getX()) {
-            return;
+            return false;
         }
 
 
@@ -127,7 +127,7 @@ public class ChartMarkerView {
         }
 
         calLabelSize();
-
+        return true;
 
     }
 
@@ -363,7 +363,7 @@ public class ChartMarkerView {
                 if (barset.isStacked()) {
                     vals = bar.getYVals();
                     for (int j = 0; j < vals.length; j++) {
-                        String val = formatter.getFormattedValue(vals[j], bar, setIndex, mChart.getViewPortHandler());
+                        String val = formatter.getFormattedValue(vals[j], bar, setIndex, j, mChart.getViewPortHandler());
                         addDataModel(labels[j], val, barset.getColor(j), vals[j], decimalFormat.format(vals[j] / bar.getY()));
                     }
                 } else {
@@ -374,14 +374,14 @@ public class ChartMarkerView {
         } else if (barset.isStacked()) {
             if (provider.isHighlightFullBarEnabled()) {
                 for (int i = 0; i < vals.length; i++) {
-                    String val = formatter.getFormattedValue(vals[i], bar, setIndex, mChart.getViewPortHandler());
+                    String val = formatter.getFormattedValue(vals[i], bar, setIndex, i, mChart.getViewPortHandler());
                     addDataModel(labels[i], val, barset.getColor(i), vals[i], decimalFormat.format(vals[i] / sum));
                 }
             } else {
                 if (stackIndex >= vals.length) {
                     return;
                 }
-                String val = formatter.getFormattedValue(vals[stackIndex], bar, setIndex, mChart.getViewPortHandler());
+                String val = formatter.getFormattedValue(vals[stackIndex], bar, setIndex, stackIndex, mChart.getViewPortHandler());
                 addDataModel(labels[stackIndex], val, barset.getColor(stackIndex), vals[stackIndex], decimalFormat.format(vals[stackIndex] / sum));
             }
 
@@ -402,7 +402,7 @@ public class ChartMarkerView {
             if (barset.isStacked()) {
                 float[] vals = bar.getYVals();
                 for (int j = 0; j < vals.length; j++) {
-                    String val = formatter.getFormattedValue(vals[j], bar, i, mChart.getViewPortHandler());
+                    String val = formatter.getFormattedValue(vals[j], bar, i, j, mChart.getViewPortHandler());
                     addDataModel(labels[j], val, barset.getColor(j), vals[j], decimalFormat.format(vals[j] / bar.getY()));
                 }
             } else {
@@ -538,5 +538,13 @@ public class ChartMarkerView {
 
     public void setBorderRadius(float radius) {
         bitmap.setRadius(radius);
+    }
+
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
     }
 }

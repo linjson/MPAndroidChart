@@ -47,6 +47,11 @@ public class LargeValueFormatter implements IValueFormatter, IAxisValueFormatter
         return makePretty(value) + mText;
     }
 
+    @Override
+    public String getFormattedValue(float value, Entry entry, int dataSetIndex, int stackIndex, ViewPortHandler viewPortHandler) {
+        return null;
+    }
+
     // IAxisValueFormatter
     @Override
     public String getFormattedValue(float value, AxisBase axis) {

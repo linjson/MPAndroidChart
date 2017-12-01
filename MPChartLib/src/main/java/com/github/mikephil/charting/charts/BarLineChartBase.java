@@ -32,12 +32,14 @@ import com.github.mikephil.charting.jobs.AnimatedZoomJob;
 import com.github.mikephil.charting.jobs.MoveViewJob;
 import com.github.mikephil.charting.jobs.ZoomJob;
 import com.github.mikephil.charting.listener.BarLineChartTouchListener;
+import com.github.mikephil.charting.listener.ChartTouchListener;
 import com.github.mikephil.charting.listener.OnDrawListener;
 import com.github.mikephil.charting.renderer.XAxisRenderer;
 import com.github.mikephil.charting.renderer.YAxisRenderer;
 import com.github.mikephil.charting.sharechart.drawable.ArrowShadowBitmap;
 import com.github.mikephil.charting.sharechart.extend.ChartMarkerView;
 import com.github.mikephil.charting.sharechart.extend.ChartUtils;
+import com.github.mikephil.charting.sharechart.scope.ScopeView;
 import com.github.mikephil.charting.utils.FSize;
 import com.github.mikephil.charting.utils.MPPointD;
 import com.github.mikephil.charting.utils.MPPointF;
@@ -226,7 +228,7 @@ public abstract class BarLineChartBase<T extends BarLineScatterCandleBubbleData<
         mXAxisRenderer.renderAxisLine(canvas);
         mAxisRendererLeft.renderAxisLine(canvas);
         mAxisRendererRight.renderAxisLine(canvas);
-        
+
         if (mXAxis.isEnabled() && mXAxis.isDrawLimitLinesBehindDataEnabled())
             mXAxisRenderer.renderLimitLines(canvas);
 
@@ -296,8 +298,14 @@ public abstract class BarLineChartBase<T extends BarLineScatterCandleBubbleData<
 
         drawDescription(canvas);
 
+
+        if (scopeViewEnabled()) {
+            mScopeView.onDraw(canvas);
+        }
+
         drawMarkers(canvas);
         drawChartMarkerView(canvas);
+
         if (mLogEnabled) {
             long drawtime = (System.currentTimeMillis() - starttime);
             totalTime += drawtime;
@@ -330,12 +338,26 @@ public abstract class BarLineChartBase<T extends BarLineScatterCandleBubbleData<
                 mXAxis.mAxisRange,
                 mAxisLeft.mAxisRange,
                 mAxisLeft.mAxisMinimum);
+
+        if (scopeViewEnabled()) {
+            mScopeView.prepareValuePxMatrix(mXAxis.mAxisMinimum + mXAxis.getSpaceMin(),
+                    mXAxis.mAxisRange - mXAxis.getSpaceMin() - mXAxis.getSpaceMax(),
+                    mAxisLeft.mAxisRange,
+                    mAxisLeft.mAxisMinimum);
+        }
+
+
     }
 
     protected void prepareOffsetMatrix() {
 
         mRightAxisTransformer.prepareMatrixOffset(mAxisRight.isInverted());
         mLeftAxisTransformer.prepareMatrixOffset(mAxisLeft.isInverted());
+
+        if (scopeViewEnabled()) {
+
+            mScopeView.prepareMatrixOffset(false);
+        }
     }
 
     @Override
@@ -454,10 +476,10 @@ public abstract class BarLineChartBase<T extends BarLineScatterCandleBubbleData<
                     switch (mLegend.getVerticalAlignment()) {
                         case TOP:
                             offsets.top += Math.min(mLegend.mNeededHeight,
-                                    mViewPortHandler.getChartHeight() * mLegend.getMaxSizePercent())
-                                    + mLegend.getYOffset();
+                                    mViewPortHandler.getChartHeight() * mLegend.getMaxSizePercent());
+//                                    + mLegend.getYOffset();
 
-                            if (getXAxis().isEnabled() && getXAxis().isDrawLabelsEnabled()){
+                            if (getXAxis().isEnabled() && getXAxis().isDrawLabelsEnabled()) {
                                 offsets.top += offset;
                             }
 
@@ -665,6 +687,10 @@ public abstract class BarLineChartBase<T extends BarLineScatterCandleBubbleData<
             offsetBottom += getExtraBottomOffset();
             offsetLeft += getExtraLeftOffset();
 
+            if (scopeViewEnabled()) {
+                offsetBottom += mScopeView.getViewHeight();
+            }
+
             float minOffset = Utils.convertDpToPixel(mMinOffset);
 
             mViewPortHandler.restrainViewPort(
@@ -672,6 +698,26 @@ public abstract class BarLineChartBase<T extends BarLineScatterCandleBubbleData<
                     Math.max(minOffset, offsetTop),
                     Math.max(minOffset, offsetRight),
                     Math.max(minOffset, offsetBottom));
+
+            if (scopeViewEnabled()) {
+                float top = mViewPortHandler.contentBottom();
+
+                if (mXAxis.isEnabled() && mXAxis.isDrawLabelsEnabled()) {
+                    final XAxis.XAxisPosition position = mXAxis.getPosition();
+                    if (position == XAxis.XAxisPosition.BOTTOM) {
+                        top += mXAxis.getYOffset() + mXAxis.mLabelRotatedHeight;
+                    }
+                }
+                mScopeView.setChartDimens(mViewPortHandler.getChartWidth(), mViewPortHandler.getChartHeight());
+                mScopeView.setViewPort(mViewPortHandler.contentLeft(),
+                        top,
+                        mViewPortHandler.contentRight(),
+                        top + mScopeView.getViewHeight());
+
+                mViewPortHandler.setMaximumScaleX(mScopeView.getMaxScale());
+            }
+
+
             FSize.recycleInstances(Arrays.asList(titleRect));
             if (size != null) {
                 FSize.recycleInstance(size);
@@ -725,6 +771,12 @@ public abstract class BarLineChartBase<T extends BarLineScatterCandleBubbleData<
         if (mChartTouchListener == null || mData == null)
             return false;
 
+        if (scopeViewEnabled() && mChartTouchListener.getTouchMode() == ChartTouchListener.NONE) {
+            if (mScopeView.canTouch(event.getY())) {
+                return mScopeView.onTouchEvent(this, event);
+            }
+        }
+
         // check if touch gestures are enabled
         if (!mTouchEnabled)
             return false;
@@ -737,6 +789,10 @@ public abstract class BarLineChartBase<T extends BarLineScatterCandleBubbleData<
 
         if (mChartTouchListener instanceof BarLineChartTouchListener)
             ((BarLineChartTouchListener) mChartTouchListener).computeScroll();
+
+        if (scopeViewEnabled()) {
+            mScopeView.computeScroll();
+        }
     }
 
     /**
@@ -1208,6 +1264,16 @@ public abstract class BarLineChartBase<T extends BarLineScatterCandleBubbleData<
         getTransformer(axis).pointValuesToPixel(mGetPositionBuffer);
 
         return MPPointF.getInstance(mGetPositionBuffer[0], mGetPositionBuffer[1]);
+    }
+
+    @Override
+    public void setData(T data) {
+        super.setData(data);
+
+        if (scopeViewEnabled()) {
+            mScopeView.setData(data);
+        }
+
     }
 
     /**
@@ -1802,6 +1868,9 @@ public abstract class BarLineChartBase<T extends BarLineScatterCandleBubbleData<
      */
     private ChartMarkerView mChartMarkerView;
     private String[] mScrollClass;
+    private ScopeView mScopeView;
+    private ViewPortListener mViewPortListener;
+
 
     public void setChartMarkerView(ChartMarkerView chartMarkerView) {
         mChartMarkerView = chartMarkerView;
@@ -1818,6 +1887,10 @@ public abstract class BarLineChartBase<T extends BarLineScatterCandleBubbleData<
 
         ChartMarkerView markerView = mChartMarkerView;
 
+
+        if (!markerView.isEnabled()) {
+            return;
+        }
 
         Highlight highlight = mIndicesToHighlight[0];
 
@@ -1840,7 +1913,10 @@ public abstract class BarLineChartBase<T extends BarLineScatterCandleBubbleData<
         }
 
 
-        markerView.prepare(highlight);
+        boolean prepare = markerView.prepare(highlight);
+        if (!prepare) {
+            return;
+        }
         if (markerView.getType().equals(ChartMarkerView.RECTANGLE)) {
             final float offset = Utils.convertDpToPixel(2);
             if (pos[0] >= mViewPortHandler.getContentCenter().x) {
@@ -1917,5 +1993,59 @@ public abstract class BarLineChartBase<T extends BarLineScatterCandleBubbleData<
 
     public void setHighlightAllEnabled(boolean highlightAllEnabled) {
         this.highlightAllEnabled = highlightAllEnabled;
+    }
+
+    public void setScaleAndTranslate(float scale, float translate) {
+        if (mChartTouchListener instanceof BarLineChartTouchListener) {
+            ((BarLineChartTouchListener) mChartTouchListener).stopDeceleration();
+        }
+
+        Matrix matrix;
+        matrix = mViewPortHandler.setZoom(scale, 1);
+        matrix = mViewPortHandler.refresh(matrix, this, false);
+
+        matrix.postTranslate(translate, 0);
+        mViewPortHandler.refresh(matrix, this, false);
+
+    }
+
+    public void setScopeView(ScopeView view) {
+        mScopeView = view;
+        if (view != null) {
+            view.setChart(this);
+            view.setOnSelectedRectListener(new ScopeView.SelectedRectListener() {
+                @Override
+                public void onSelectRectChange(float scale, float translate) {
+                    setScaleAndTranslate(scale, translate);
+                }
+            });
+
+            mViewPortListener = new ViewPortListener() {
+                @Override
+                public void onViewPortChange(float scale, float translate) {
+                    mScopeView.setSeclectRect(scale, translate);
+                }
+            };
+        }
+    }
+
+    private boolean scopeViewEnabled() {
+        return mScopeView != null && mScopeView.isEnabled();
+    }
+
+    public ViewPortListener getViewPortListener() {
+        return mViewPortListener;
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        if (scopeViewEnabled()) {
+            mScopeView.releaseBitmap();
+        }
+    }
+
+    public interface ViewPortListener {
+        void onViewPortChange(float scale, float translate);
     }
 }

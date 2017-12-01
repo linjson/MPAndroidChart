@@ -60,6 +60,11 @@ public class DefaultValueFormatter implements IValueFormatter
         return mFormat.format(value);
     }
 
+    @Override
+    public String getFormattedValue(float value, Entry entry, int dataSetIndex, int stackIndex, ViewPortHandler viewPortHandler) {
+        return "";
+    }
+
     /**
      * Returns the number of decimal digits this formatter uses.
      *

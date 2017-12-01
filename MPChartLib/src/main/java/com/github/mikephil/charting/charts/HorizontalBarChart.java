@@ -344,7 +344,9 @@ public class HorizontalBarChart extends BarChart {
      */
     @Override
     public Highlight getHighlightByTouchPoint(float x, float y) {
-
+        if (!getViewPortHandler().getContentRect().contains(x, y)) {
+            return null;
+        }
         if (mData == null) {
             if (mLogEnabled)
                 Log.e(LOG_TAG, "Can't select by touch. No data set.");

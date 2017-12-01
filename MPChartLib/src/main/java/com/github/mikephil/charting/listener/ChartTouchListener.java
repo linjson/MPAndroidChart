@@ -22,7 +22,7 @@ public abstract class ChartTouchListener<T extends Chart<?>> extends GestureDete
     protected ChartGesture mLastGesture = ChartGesture.NONE;
 
     // states
-    protected static final int NONE = 0;
+    public static final int NONE = 0;
     protected static final int DRAG = 1;
     protected static final int X_ZOOM = 2;
     protected static final int Y_ZOOM = 3;

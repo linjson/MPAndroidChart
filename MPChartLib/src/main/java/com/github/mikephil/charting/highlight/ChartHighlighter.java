@@ -38,6 +38,8 @@ public class ChartHighlighter<T extends BarLineScatterCandleBubbleDataProvider> 
         MPPointD.recycleInstance(pos);
 
         Highlight high = getHighlightForX(xVal, x, y);
+
+
         return high;
     }
 

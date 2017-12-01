@@ -89,7 +89,9 @@ public class BarChart extends BarLineChartBase<BarData> implements BarDataProvid
      */
     @Override
     public Highlight getHighlightByTouchPoint(float x, float y) {
-
+        if (!getViewPortHandler().getContentRect().contains(x, y)) {
+            return null;
+        }
         if (mData == null) {
             Log.e(LOG_TAG, "Can't select by touch. No data set.");
             return null;

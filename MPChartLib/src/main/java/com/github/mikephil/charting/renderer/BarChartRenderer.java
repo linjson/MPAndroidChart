@@ -486,7 +486,7 @@ public class BarChartRenderer extends BarLineScatterCandleBubbleRenderer {
                                     continue;
                                 }
                                 if (dataSet.isDrawValuesEnabled()) {
-                                    drawValue(c, dataSet.getValueFormatter(), vals[idx], entry, i, x, y, color);
+                                    drawValue(c, dataSet.getValueFormatter(), vals[idx], entry, i,idx, x, y, color);
                                 }
 
                                 if (entry.getIcon() != null && dataSet.isDrawIconsEnabled()) {

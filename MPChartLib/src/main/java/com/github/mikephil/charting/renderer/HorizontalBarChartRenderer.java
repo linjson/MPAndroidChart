@@ -417,7 +417,7 @@ public class HorizontalBarChartRenderer extends BarChartRenderer {
                                 float x;
                                 boolean pos = val >= 0;
                                 float[] values = null;
-                                String formattedValue = formatter.getFormattedValue(val, entry, i, mViewPortHandler);
+                                String formattedValue = formatter.getFormattedValue(val, entry, i,idx, mViewPortHandler);
                                 // calculate the correct offset depending on the draw position of the value
                                 float valueTextWidth = Utils.calcTextWidth(mValuePaint, formattedValue);
                                 posOffset = (drawValueAboveBar ? valueOffsetPlus : -(valueTextWidth + valueOffsetPlus));

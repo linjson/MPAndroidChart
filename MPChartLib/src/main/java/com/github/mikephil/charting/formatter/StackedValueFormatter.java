@@ -72,4 +72,9 @@ public class StackedValueFormatter implements IValueFormatter
         // return the "proposed" value
         return mFormat.format(value) + mAppendix;
     }
+
+    @Override
+    public String getFormattedValue(float value, Entry entry, int dataSetIndex, int stackIndex, ViewPortHandler viewPortHandler) {
+        return null;
+    }
 }
