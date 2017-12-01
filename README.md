@@ -25,11 +25,10 @@ Donations
  - [**Donate 10 $**](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=4C9TPE67F5PUQ): Wow, I am stunned. Let me take you to the movies!
  - [**Donate 15 $**](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=YKMPTFMVK3JMC): I really appreciate your work, let's grab some lunch! 
  - [**Donate 25 $**](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=H9JA4QX7UHXCY): That's some awesome stuff you did right there, dinner is on me!
- - [**Donate 50 $**](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=ZPQVJ2XRBSBYY): I really really want to support this project, great job!
- - [**Donate 100 $**](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=KY7F59RYPCYCQ): You are the man! This project saved me hours (if not days) of struggle and hard work, simply awesome!
- - Of course, you can also [**choose what you want to donate**](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=EGBENAC5XBCKS), all donations are awesome!
-
-If you just want to be nice, you can check out and rate the new [**Telegram Chat Bot**]( https://storebot.me/bot/myalfred_bot) we created for scheduling meetings and other stuff. 😉
+ - Or you can also [**choose what you want to donate**](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=EGBENAC5XBCKS), all donations are awesome!
+ 
+## Got a question?
+[Contact me via 21.co](https://21.co/philjay/)
 
 
 ## Xamarin
@@ -68,7 +67,7 @@ If you are having questions or problems, you should:
 
  - **Review your code**. Make absolutely sure that everything is correct on your side.
  - Make sure you are using the **latest version** of the library. Check the [**release-section**](https://github.com/PhilJay/MPAndroidChart/releases).
- - Study the [**Documentation-Wiki**](https://github.com/PhilJay/MPAndroidChart/wiki) or the [javadocs](https://jitpack.io/com/github/PhilJay/MPAndroidChart/v3.0.2/javadoc/)
+ - Study the [**Documentation-Wiki**](https://github.com/PhilJay/MPAndroidChart/wiki) or the [javadocs](https://jitpack.io/com/github/PhilJay/MPAndroidChart/v3.0.3/javadoc/)
  - Search or open questions on [**stackoverflow**](https://stackoverflow.com/search?q=mpandroidchart) with the `mpandroidchart` tag
  - Search [**known issues**](https://github.com/PhilJay/MPAndroidChart/issues) for your problem (open and closed)
  - Create new issues (please :fire: **search known issues before** :fire:, do not create duplicate issues)
@@ -93,7 +92,7 @@ Features
  - Animations (build up animations, on both xPx- and yPx-axis)
  - Limit lines (providing additional information, maximums, ...)
  - Fully customizable (paints, typefaces, legends, colors, background, gestures, dashed lines, ...)
- - Smooth zooming and scrolling for up to 30.000 data points in Line- and BarChart
+ - Smooth zooming and scrolling for up to 10.000 data points in Line- and BarChart
  - Gradle support
  - Plotting data directly from [**Realm.io**](https://realm.io) mobile database: [**MPAndroidChart-Realm**](https://github.com/PhilJay/MPAndroidChart-Realm) :zap:
  
@@ -117,7 +116,7 @@ allprojects {
  
 ```gradle
 dependencies {
-	compile 'com.github.PhilJay:MPAndroidChart:v3.0.2'
+	implementation 'com.github.PhilJay:MPAndroidChart:v3.0.3'
 }
 ```
 
@@ -136,7 +135,7 @@ dependencies {
 <dependency>
         <groupId>com.github.PhilJay</groupId>
         <artifactId>MPAndroidChart</artifactId>
-        <version>v3.0.2</version>
+        <version>v3.0.3</version>
 </dependency>
 ```
 
@@ -156,7 +155,7 @@ dependencies {
 
 Documentation
 -----
-For a **detailed documentation** :notebook_with_decorative_cover:, please have a look at the [**Wiki**](https://github.com/PhilJay/MPAndroidChart/wiki) or the [javadocs](https://jitpack.io/com/github/PhilJay/MPAndroidChart/v3.0.2/javadoc/).
+For a **detailed documentation** :notebook_with_decorative_cover:, please have a look at the [**Wiki**](https://github.com/PhilJay/MPAndroidChart/wiki) or the [javadocs](https://jitpack.io/com/github/PhilJay/MPAndroidChart/v3.0.3/javadoc/).
 
 Furthermore, you can also rely on the [**MPChartExample**](https://github.com/PhilJay/MPAndroidChart/tree/master/MPChartExample) folder and check out the example code in that project. The corresponding application to the example project is also  [**available in the Google PlayStore**](https://play.google.com/store/apps/details?id=com.xxmassdeveloper.mpchartexample). 
 
